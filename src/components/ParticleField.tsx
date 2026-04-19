@@ -12,7 +12,7 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 // ----------------------------------------------------------------------
 // FIXED COLOR PALETTE (only the 5 specified colors)
 // ----------------------------------------------------------------------
-const FIXED_PALETTE = ["#00076f", "#44008b", "#9f45b0", "#e54ed0", "#ffe4f2"];
+const FIXED_PALETTE = ["#05070f", "#1b1035", "#3b1d6b", "#7c3aed", "#f0abfc"];
 
 // ----------------------------------------------------------------------
 // SHADERS (unchanged from original)
@@ -292,7 +292,7 @@ const ParticleField: React.FC = () => {
       ref={containerRef}
       style={{
         position: 'absolute',
-        top: 0,
+        top: -100,
         left: 0,
         width: '100%',
         height: '100%',

@@ -28,8 +28,11 @@ const Home = () => {
 
   return (
     <div className="bg-black">
+       
+
+
       {/* Full‑screen particle section */}
-      <section className="relative h-screen w-full overflow-hidden">
+      <section className="relative h-[70vh] w-full overflow-hidden">
         <Suspense fallback={null}>
           <ParticleField />
         </Suspense>
@@ -40,11 +43,11 @@ const Home = () => {
       {/* Rest of the page (scrolls below the particle section) */}
       <div className="relative z-10 bg-black">
         <HeroSection />
-        <ImagesSliderSection />
+        {/* <ImagesSliderSection /> */}
         <ExperienceSection />
-        <ProjectsSection />
-        <AboutSection />
-        <TestimonialsSection />
+        {/* <ProjectsSection /> */}
+        {/* <AboutSection /> */}
+        {/* <TestimonialsSection /> */}
         <Footer />
       </div>
 
