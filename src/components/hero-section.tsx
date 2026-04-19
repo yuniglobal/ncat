@@ -1,4 +1,4 @@
-import { HeroSectionSubHeading, LinkedInProfile } from "@/lib/constants";
+import { LinkedInProfile } from "@/lib/constants";
 import MaxWidthWrapper from "./max-width-wrapper";
 import { MyWorkBtn } from "./ui/my-work-btn";
 import { LetsConnectBtn } from "./ui/lets-connect-btn";
@@ -6,20 +6,36 @@ import { Link } from "react-router";
 
 const HeroSection = () => {
   return (
-    <div id="Hero" className="z-[2] flex h-screen w-full justify-center items-center">
+    <section id="Intro" className="z-[2] flex w-full items-center py-12 md:py-16">
       <MaxWidthWrapper>
-        <div className="mt-10 md:mt-10 mb-10">
-          {/* MASSIVE heading – scales fluidly from 6rem to 20rem */}
-          <h1 className="text-white font-extrabold text-center tracking-tight font-['Plus_Jakarta_Sans'] leading-none 
-                         text-[15vw] md:text-[18vw] lg:text-[20vw] xl:text-[16rem]">
-            NCAT
-          </h1>
+        <div className="max-w-4xl mx-auto text-center md:text-left">
+          {/* Section heading */}
+          <h2 className="text-white text-4xl md:text-5xl lg:text-6xl font-extrabold font-['Plus_Jakarta_Sans'] mb-6 tracking-tight">
+            About <span className="text-[#f0abfc]">NCAT</span>
+          </h2>
 
-          <p className="text-white text-base md:text-xl font-medium text-center font-myMainFont my-6 md:my-8 max-w-2xl mx-auto">
-            {HeroSectionSubHeading}
-          </p>
+          {/* Big explanation */}
+          <div className="space-y-6 text-white/80 text-base md:text-lg leading-relaxed">
+            <p>
+              <strong className="text-white font-semibold">NCAT</strong> isn’t just another creative studio—we’re a 
+              collective of forward‑thinking designers, developers, and strategists who believe in building digital 
+              experiences that matter. Our name stands for{" "}
+              <span className="text-[#f0abfc] font-medium">Next‑Gen Creative Agency & Technology</span>, and 
+              that’s exactly what we deliver.
+            </p>
+            <p>
+              We partner with ambitious brands to craft immersive websites, powerful web applications, and 
+              unforgettable brand identities. From pixel‑perfect frontends to scalable backends, every project is 
+              a blend of artistry and engineering.
+            </p>
+            <p>
+              Whether you’re launching a new product or reimagining an existing one, NCAT brings the technical 
+              depth and creative vision to make your digital presence impossible to ignore.
+            </p>
+          </div>
 
-          <div className="flex flex-col md:flex-row items-center gap-4 justify-center">
+          {/* Call to action buttons */}
+          <div className="flex flex-col sm:flex-row items-center gap-4 justify-center md:justify-start mt-10">
             <Link target="_blank" to={LinkedInProfile}>
               <LetsConnectBtn />
             </Link>
@@ -29,7 +45,7 @@ const HeroSection = () => {
           </div>
         </div>
       </MaxWidthWrapper>
-    </div>
+    </section>
   );
 };
 

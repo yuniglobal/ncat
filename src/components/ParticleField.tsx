@@ -292,7 +292,7 @@ const ParticleField: React.FC = () => {
       ref={containerRef}
       style={{
         position: 'absolute',
-        top: -100,
+        top: 0,          // was -100
         left: 0,
         width: '100%',
         height: '100%',
