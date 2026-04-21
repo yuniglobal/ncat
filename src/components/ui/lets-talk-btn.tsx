@@ -3,7 +3,8 @@ import { motion, useAnimation } from 'motion/react';
 import type { HTMLAttributes } from 'react';
 import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 import { cn } from '@/lib/utils';
-import { FooterSectionBtn } from '@/lib/constants';
+
+const FooterSectionBtn = "Let's Talk";
 
 export interface ArrowUpIconHandle {
   startAnimation: () => void;

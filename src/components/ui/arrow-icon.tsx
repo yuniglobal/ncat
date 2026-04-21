@@ -77,7 +77,7 @@ const ArrowUpIcon = forwardRef<ArrowUpIconHandle, ArrowUpIconProps>(
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <p>Contact</p>
+        <p>Register</p>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width={size}

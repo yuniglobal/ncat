@@ -3,7 +3,8 @@ import { motion, useAnimation } from 'motion/react';
 import type { HTMLAttributes } from 'react';
 import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 import { cn } from '@/lib/utils';
-import { HeroLetsConnectButton } from '@/lib/constants';
+
+const HeroLetsConnectButton = "Let's Connect";
 
 export interface ArrowUpIconHandle {
   startAnimation: () => void;

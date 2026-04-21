@@ -3,7 +3,8 @@ import { motion, useAnimation } from "motion/react";
 import type { HTMLAttributes } from "react";
 import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { ProjectsSectionGithubButton } from "@/lib/constants";
+
+const ProjectsSectionGithubButton = "View More on";
 
 export interface GithubIconHandle {
   startAnimation: () => void;

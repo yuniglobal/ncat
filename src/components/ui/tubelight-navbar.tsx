@@ -2,14 +2,12 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { fullName, profilePhoto } from "@/lib/constants";
+import Photo from "../../assets/img/myProfilePhoto.jpeg";
 import { ArrowUpIcon } from "./arrow-icon";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "./dropdown-menu";
-import { Menu } from "lucide-react";
+import { Menu, X } from "lucide-react";
+
+const fullName = "bilalaniq";
+const profilePhoto = Photo;
 
 interface NavItem {
   name: string;
@@ -25,6 +23,7 @@ interface NavBarProps {
 
 export function TubeLightNavBar({ items, className, firstName }: NavBarProps) {
   const [activeTab, setActiveTab] = useState(items[0].name);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -179,52 +178,17 @@ export function TubeLightNavBar({ items, className, firstName }: NavBarProps) {
             </p>
           </a>
           <div className="flex flex-row items-center">
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                <div
-                  className="px-2 py-2 mr-1 md:mr-2 rounded-full"
-                  style={{ backgroundColor: colors.magenta }}
-                >
-                  <Menu size={22} className="text-white" />
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="mt-3 shadow-lg rounded-2xl" align="center">
-                <div
-                  className="p-2.5 flex flex-col border backdrop-blur-sm rounded-2xl"
-                  style={{
-                    borderColor: colors.pink,
-                    backgroundColor: "rgba(0, 7, 111, 0.5)",
-                  }}
-                >
-                  {items.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = activeTab === item.name;
-
-                    return (
-                      <a
-                        key={item.name}
-                        href={item.url}
-                        onClick={() => setActiveTab(item.name)}
-                        className={cn(
-                          "relative text-sm md:text-base font-myMainFont font-semibold px-4.5 py-2.5 rounded-full transition-all",
-                          isActive
-                            ? "text-white"
-                            : "text-white/80 hover:text-white hover:bg-white/10"
-                        )}
-                        style={{
-                          backgroundColor: isActive ? colors.magenta : "transparent",
-                        }}
-                      >
-                        <span className="hidden md:inline">{item.name}</span>
-                        <span className="md:hidden">
-                          <Icon size={18} strokeWidth={2.5} />
-                        </span>
-                      </a>
-                    );
-                  })}
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="px-2 py-2 mr-1 md:mr-2 rounded-full"
+              style={{ backgroundColor: colors.magenta }}
+            >
+              {isMenuOpen ? (
+                <X size={22} className="text-white" />
+              ) : (
+                <Menu size={22} className="text-white" />
+              )}
+            </button>
             <a
               href="https://wa.me/+92344603782?text=Hello, How can I help you?"
               target="_blank"
@@ -233,6 +197,52 @@ export function TubeLightNavBar({ items, className, firstName }: NavBarProps) {
             </a>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="mt-3 w-full"
+          >
+            <div
+              className="p-2.5 flex flex-col border backdrop-blur-sm rounded-2xl gap-2"
+              style={{
+                borderColor: colors.pink,
+                backgroundColor: "rgba(0, 7, 111, 0.5)",
+              }}
+            >
+              {items.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.name;
+
+                return (
+                  <a
+                    key={item.name}
+                    href={item.url}
+                    onClick={() => {
+                      setActiveTab(item.name);
+                      setIsMenuOpen(false);
+                    }}
+                    className={cn(
+                      "relative text-sm md:text-base font-myMainFont font-semibold px-4.5 py-2.5 rounded-full transition-all flex items-center gap-2",
+                      isActive
+                        ? "text-white"
+                        : "text-white/80 hover:text-white hover:bg-white/10"
+                    )}
+                    style={{
+                      backgroundColor: isActive ? colors.magenta : "transparent",
+                    }}
+                  >
+                    <Icon size={18} strokeWidth={2.5} />
+                    <span>{item.name}</span>
+                  </a>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
       </div>
     </div>
   );

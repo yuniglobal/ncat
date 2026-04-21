@@ -3,8 +3,9 @@ import { lazy, Suspense } from "react";
 import HeroSection from "@/components/hero-section";
 import Footer from "@/components/footer";
 import GuestGrid from "@/components/GuestGrid";
-
-// Import the main showcase component (handles its own state and detail view)
+import SpeakerGrid from "@/components/SpeakersGrid";
+import OrganizerCards from "@/components/OrganizerCards";
+import Slider from "@/components/Slider";
 
 const ParticleField = lazy(() => import("@/components/ParticleField"));
 
@@ -18,9 +19,23 @@ const Home = () => {
     window.__setParticleSpeed?.(false);
   };
 
+
+  const logoImages = [
+    'https://picsum.photos/id/100/100/100',
+    'https://picsum.photos/id/101/100/100',
+    'https://picsum.photos/id/104/100/100',
+    'https://picsum.photos/id/107/100/100',
+    'https://picsum.photos/id/116/100/100',
+    'https://picsum.photos/id/119/100/100',
+    'https://picsum.photos/id/120/100/100',
+    'https://picsum.photos/id/155/100/100',
+    'https://picsum.photos/id/169/100/100',
+    'https://picsum.photos/id/176/100/100',
+  ];
+
   return (
     <div className="bg-black">
-      {/* Full‑screen particle section */}
+      {/* Hero section with particles */}
       <section
         id="Hero"
         className="relative h-screen w-full overflow-hidden scroll-mt-20 md:scroll-mt-24"
@@ -49,20 +64,22 @@ const Home = () => {
       {/* Main content */}
       <div className="relative z-10 bg-black">
         <HeroSection />
+        <OrganizerCards />
 
-        {/* ----- EVENT GUESTS SECTION ----- */}
+        {/* ----- EVENT GUESTS & SPEAKERS ----- */}
         <section className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Meet Our Guests
-            </h2>
-            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-              Distinguished speakers, panelists, and workshop hosts joining us for an unforgettable experience.
-            </p>
-          </div>
-          {/* 👇 Add the guest grid here */}
           <GuestGrid />
+          <SpeakerGrid />
         </section>
+
+        {/* ----- SPONSORS SCROLL CAROUSEL ----- */}
+        <Slider
+          images={logoImages.slice(0, 9)}
+          width={230}
+          height={230}
+          reverse={true}
+          quantity={9}
+        />
 
         <Footer />
       </div>
