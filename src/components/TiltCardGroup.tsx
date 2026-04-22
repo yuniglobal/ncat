@@ -239,26 +239,7 @@ const TiltCardGroup: React.FC<TiltCardGroupProps> = ({
         }
       `}</style>
 
-      {showThemeToggle && (
-        <button
-          onClick={() => setIsLight(!isLight)}
-          className="fixed top-5 right-5 bg-transparent border-none p-0 text-[var(--name-color)] flex justify-center items-center z-50"
-          title="Switch Theme"
-        >
-          <svg
-            className={`w-9 h-9 ${isLight ? "fill-[var(--name-color)]" : ""}`}
-            fill="none"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
-            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
-          </svg>
-        </button>
-      )}
-
+    
       {/* Responsive container */}
       <div className="flex justify-center items-center">
         <div className="relative flex justify-center items-center flex-wrap w-full max-w-[1200px] preserve-3d px-4">

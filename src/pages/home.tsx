@@ -8,6 +8,7 @@ import GallerySection1 from "@/components/ImageGrid1";
 import GallerySection2 from "@/components/ImageGrid2";
 import StaircaseHoverList from "@/components/StaircaseHoverList";
 import TeamMembers from "@/components/TeamMembers";
+import TextEffect from '@/components/TextEffect';
 
 const ParticleField = lazy(() => import("@/components/ParticleField"));
 
@@ -194,22 +195,7 @@ const Home = () => {
 
         <GallerySection2 />
 
-        <div className="text-center mb-10">
-          <h2 className="text-[#f0abfc] text-3xl md:text-4xl font-bold drop-shadow-md">
-            Our Partners
-          </h2>
-          <p className="text-white/80 mt-2 drop-shadow-sm">
-            Learn from industry-leading experts
-          </p>
-        </div>
 
-        <Slider
-          images={logoImages.slice(0, 9)}
-          width={230}
-          height={230}
-          reverse={true}
-          quantity={9}
-        />
 
         <div className="text-center mt-50 mb-10">
           <h2 className="text-[#f0abfc] text-3xl md:text-4xl font-bold drop-shadow-md">
@@ -235,6 +221,26 @@ const Home = () => {
         <div className="max-w-6xl mx-auto px-4 mb-40">
           <TeamMembers />
         </div>
+
+
+        <div className="text-center mb-10">
+          <h2 className="text-[#f0abfc] text-3xl md:text-4xl font-bold drop-shadow-md">
+            Our Partners
+          </h2>
+          <p className="text-white/80 mt-2 drop-shadow-sm">
+            Learn from industry-leading experts
+          </p>
+        </div>
+
+        <Slider
+          images={logoImages.slice(0, 9)}
+          width={230}
+          height={230}
+          reverse={true}
+          quantity={9}
+        />
+
+        <TextEffect />
 
         <Footer />
       </div>
