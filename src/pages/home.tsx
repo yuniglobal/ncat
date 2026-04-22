@@ -1,11 +1,9 @@
-// src/pages/Home.tsx
 import { lazy, Suspense } from "react";
 import HeroSection from "@/components/hero-section";
 import Footer from "@/components/footer";
-import GuestGrid from "@/components/GuestGrid";
-import SpeakerGrid from "@/components/SpeakersGrid";
 import OrganizerCards from "@/components/OrganizerCards";
 import Slider from "@/components/Slider";
+import GallerySection from "@/components/GallerySection";
 
 const ParticleField = lazy(() => import("@/components/ParticleField"));
 
@@ -18,7 +16,6 @@ const Home = () => {
     // @ts-ignore
     window.__setParticleSpeed?.(false);
   };
-
 
   const logoImages = [
     'https://picsum.photos/id/100/100/100',
@@ -44,10 +41,10 @@ const Home = () => {
           <ParticleField />
         </Suspense>
 
-        <div className="relative z-10 flex h-full flex-col pt-20 md:pt-24">
+        <div className="relative z-10 flex h-full flex-col pt-28 md:pt-32 lg:pt-36">
           <div className="flex flex-1 flex-col items-center justify-center gap-4">
             <h1
-              className="text-white font-extrabold text-center tracking-tight font-['Plus_Jakarta_Sans'] leading-none 
+              className="text-white font-extrabold text-center tracking-tight font-['Plus_Jakarta_Sans'] leading-[0.9]
                          text-[15vw] md:text-[18vw] lg:text-[20vw] xl:text-[16rem] transition-colors duration-300"
               onMouseEnter={handleSpeedUp}
               onMouseLeave={handleSlowDown}
@@ -66,13 +63,23 @@ const Home = () => {
         <HeroSection />
         <OrganizerCards />
 
-        {/* ----- EVENT GUESTS & SPEAKERS ----- */}
-        <section className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
-          <GuestGrid />
-          <SpeakerGrid />
-        </section>
+        <div className="text-center mb-10">
+          <h2 className="text-[#f0abfc] text-3xl md:text-4xl font-bold drop-shadow-md">Our Speakers</h2>
+          <p className="text-white/80 mt-2 drop-shadow-sm">Learn from industry-leading experts</p>
+        </div>
 
-        {/* ----- SPONSORS SCROLL CAROUSEL ----- */}
+        {/* Gallery Section – uses default portrait photos (no imageIds prop needed) */}
+        <GallerySection />
+
+        <div className="text-center mb-10">
+          <h2 className="text-[#f0abfc] text-3xl md:text-4xl font-bold drop-shadow-md">
+            Our Partners
+          </h2>
+          <p className="text-white/80 mt-2 drop-shadow-sm">
+            Learn from industry-leading experts
+          </p>
+        </div>
+
         <Slider
           images={logoImages.slice(0, 9)}
           width={230}
@@ -80,6 +87,24 @@ const Home = () => {
           reverse={true}
           quantity={9}
         />
+
+        {/* CTA SECTION ABOVE FOOTER */}
+        <section className="py-20 md:py-28 px-4 text-center">
+          <div className="flex flex-col items-center gap-3">
+            <a
+              href="mailto:hi@filip.fyi"
+              className="text-[#f0abfc] hover:text-[#e879f9] text-2xl md:text-3xl lg:text-4xl font-bold uppercase tracking-wider transition-colors"
+            >
+              GET IN TOUCH
+            </a>
+            <a
+              href="mailto:hi@filip.fyi"
+              className="text-gray-300 hover:text-white text-lg md:text-xl transition-colors"
+            >
+              hi@filip.fyi
+            </a>
+          </div>
+        </section>
 
         <Footer />
       </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
+import { Link } from "react-router";
 import { cn } from "@/lib/utils";
 import Photo from "../../assets/img/myProfilePhoto.jpeg";
 import { ArrowUpIcon } from "./arrow-icon";
@@ -49,18 +50,17 @@ export function TubeLightNavBar({ items, className, firstName }: NavBarProps) {
     return () => observer.disconnect();
   }, [items]);
 
-  // Colors from particle scheme
   const colors = {
-    bgDark: "#00076f",      // deep navy
-    purpleDeep: "#44008b",  // deep purple
-    magenta: "#9f45b0",     // vibrant magenta
-    pink: "#e54ed0",        // bright pink
-    lightPink: "#ffe4f2",   // soft pink
+    bgDark: "#00076f",
+    purpleDeep: "#44008b",
+    magenta: "#9f45b0",
+    pink: "#e54ed0",
+    lightPink: "#ffe4f2",
   };
 
   return (
     <div>
-      {/* Desktop */}
+      {/* ----- DESKTOP NAVIGATION ----- */}
       <div
         className={cn(
           "hidden lg:block fixed z-[50] top-0 left-1/2 -translate-x-1/2 mb-6 md:pt-8 pt-4",
@@ -71,9 +71,10 @@ export function TubeLightNavBar({ items, className, firstName }: NavBarProps) {
           className="flex items-center gap-3 border backdrop-blur-sm py-2.5 px-3.5 rounded-full shadow-lg"
           style={{
             borderColor: colors.pink,
-            backgroundColor: "rgba(0, 7, 111, 0.3)", // #00076f with opacity
+            backgroundColor: "rgba(0, 7, 111, 0.3)",
           }}
         >
+          {/* Profile / Logo */}
           <a href="/#Hero" className="flex items-center gap-2 mr-14">
             <img
               className="w-11 aspect-square object-cover object-[center_9%] rounded-full mt-1 border-2"
@@ -85,6 +86,8 @@ export function TubeLightNavBar({ items, className, firstName }: NavBarProps) {
               {firstName}
             </p>
           </a>
+
+          {/* Navigation Items */}
           {items.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.name;
@@ -126,7 +129,7 @@ export function TubeLightNavBar({ items, className, firstName }: NavBarProps) {
                     >
                       <div
                         className="absolute w-12 h-6 rounded-full blur-md -top-2 -left-2"
-                        style={{ backgroundColor: colors.pink + "40" }} // 25% opacity
+                        style={{ backgroundColor: colors.pink + "40" }}
                       />
                       <div
                         className="absolute w-8 h-6 rounded-full blur-sm -top-1"
@@ -142,17 +145,15 @@ export function TubeLightNavBar({ items, className, firstName }: NavBarProps) {
               </a>
             );
           })}
-          <a
-            href="https://wa.me/+923056303037?text=Hello, How can I help you?"
-            target="_blank"
-            className="ml-14"
-          >
-            <ArrowUpIcon color={colors.lightPink} />
-          </a>
+
+          {/* Register Button (ArrowUpIcon as navigation only) */}
+          <Link to="/register" className="ml-4">
+            <ArrowUpIcon className="hover:opacity-80 transition-opacity" />
+          </Link>
         </div>
       </div>
 
-      {/* Mobile */}
+      {/* ----- MOBILE NAVIGATION ----- */}
       <div
         className={cn(
           "block lg:hidden fixed z-[50] top-0 left-4 right-4 md:left-20 md:right-20 mb-6 md:pt-8 pt-4",
@@ -166,7 +167,8 @@ export function TubeLightNavBar({ items, className, firstName }: NavBarProps) {
             backgroundColor: "rgba(0, 7, 111, 0.3)",
           }}
         >
-          <a href="/#Hero" className="flex items-center gap-2 mr-14">
+          {/* Profile */}
+          <a href="/#Hero" className="flex items-center gap-2">
             <img
               className="w-10 md:w-12 aspect-square object-cover object-[center_30%] rounded-full border-2"
               style={{ borderColor: colors.lightPink }}
@@ -177,28 +179,23 @@ export function TubeLightNavBar({ items, className, firstName }: NavBarProps) {
               {firstName}
             </p>
           </a>
-          <div className="flex flex-row items-center">
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="px-2 py-2 mr-1 md:mr-2 rounded-full"
-              style={{ backgroundColor: colors.magenta }}
-            >
-              {isMenuOpen ? (
-                <X size={22} className="text-white" />
-              ) : (
-                <Menu size={22} className="text-white" />
-              )}
-            </button>
-            <a
-              href="https://wa.me/+92344603782?text=Hello, How can I help you?"
-              target="_blank"
-            >
-              <ArrowUpIcon color={colors.lightPink} />
-            </a>
-          </div>
+
+          {/* Menu Toggle Only (WhatsApp removed) */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="px-2 py-2 rounded-full"
+            style={{ backgroundColor: colors.magenta }}
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? (
+              <X size={22} className="text-white" />
+            ) : (
+              <Menu size={22} className="text-white" />
+            )}
+          </button>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Dropdown Menu */}
         {isMenuOpen && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -240,6 +237,15 @@ export function TubeLightNavBar({ items, className, firstName }: NavBarProps) {
                   </a>
                 );
               })}
+
+              {/* Register Link inside Mobile Menu */}
+              <Link
+                to="/register"
+                onClick={() => setIsMenuOpen(false)}
+                className="w-full"
+              >
+                <ArrowUpIcon className="w-full justify-center" />
+              </Link>
             </div>
           </motion.div>
         )}
