@@ -1,185 +1,77 @@
-import React, { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { CustomEase } from 'gsap/CustomEase';
-
-gsap.registerPlugin(ScrollTrigger, CustomEase);
+import React from 'react';
+import { FaTwitter, FaLinkedin, FaGithub, FaInstagram, FaEnvelope, FaPhoneAlt, FaMapMarkerAlt } from 'react-icons/fa';
 
 const Footer: React.FC = () => {
-  const footerPathRef = useRef<SVGPathElement>(null);
-
-  useEffect(() => {
-    CustomEase.create('svgEase', '0.25, 0.1, 0.25, 1');
-
-    const footerPath = footerPathRef.current;
-    if (footerPath) {
-      gsap.set(footerPath, {
-        opacity: 0,
-        y: 50,
-        filter: 'blur(8px)',
-      });
-
-      const footerTl = gsap.timeline({ paused: true });
-      footerTl.to(footerPath, {
-        opacity: 1,
-        y: 0,
-        filter: 'blur(0px)',
-        duration: 1.4,
-        ease: 'svgEase',
-      });
-
-      ScrollTrigger.create({
-        trigger: '#footer',
-        start: 'top bottom-=100',
-        onEnter: () => footerTl.play(),
-        onLeaveBack: () => footerTl.reverse(),
-      });
-    }
-
-    return () => {
-      ScrollTrigger.getAll().forEach((st) => st.kill());
-    };
-  }, []);
-
   return (
-    <section
-      id="footer"
-      className="relative z-20 bg-black text-white overflow-hidden flex flex-col justify-end"
-      style={{ minHeight: '70vh' }}
-    >
-      {/* SVG Container – now part of flex flow, not absolute */}
-      <div className="w-full pointer-events-none mt-auto">
-        <svg
-          width="100%"
-          height="auto"
-          viewBox="0 0 78 30"               // increased height from 19 to 30
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-full block"
-          preserveAspectRatio="xMidYMid meet"
-          style={{ minHeight: '120px' }}    // ensures visibility on tiny screens
-        >
-          <g transform="matrix(1 0 0 -0.519 0 30)">  {/* adjusted translate Y from 19 to 30 */}
-            <path
-              className="footer-svg-paths"
-              fill="white"
-              ref={footerPathRef}
-              d="
-                M 16.25 36.00
-                L 16.25 0.59
-                L 13.46 0.59
-                L 2.62 28.38
-                L 2.62 0.59
-                L 0.00 0.59
-                L 0.00 36.00
-                L 2.81 36.00
-                L 13.64 8.21
-                L 13.64 36.00
-                L 16.25 36.00
-                M 35.84 33.89
-                L 37.11 31.85
-                L 38.09 29.31
-                L 38.78 26.29
-                L 36.09 25.20
-                L 35.55 27.54
-                L 34.86 29.42
-                L 34.02 30.83
-                L 33.03 31.81
-                L 31.88 32.40
-                L 30.59 32.59
-                L 29.09 32.37
-                L 27.77 31.72
-                L 26.62 30.63
-                L 25.66 29.18
-                L 24.91 27.43
-                L 24.37 25.38
-                L 24.02 23.16
-                L 23.80 20.89
-                L 23.73 18.58
-                L 23.81 15.70
-                L 24.07 13.07
-                L 24.49 10.70
-                L 25.10 8.64
-                L 25.89 6.97
-                L 26.87 5.67
-                L 27.98 4.74
-                L 29.14 4.18
-                L 30.36 4.00
-                L 31.81 4.25
-                L 33.10 5.01
-                L 34.24 6.27
-                L 35.18 8.03
-                L 35.90 10.27
-                L 36.39 13.00
-                L 39.12 11.82
-                L 38.40 8.28
-                L 37.37 5.35
-                L 36.04 3.03
-                L 34.44 1.34
-                L 32.63 0.34
-                L 30.59 0.00
-                L 28.51 0.26
-                L 26.70 1.03
-                L 25.17 2.33
-                L 23.89 4.11
-                L 22.83 6.36
-                L 21.99 9.07
-                L 21.39 12.09
-                L 21.02 15.25
-                L 20.90 18.56
-                L 21.04 22.09
-                L 21.45 25.30
-                L 22.13 28.20
-                L 23.07 30.73
-                L 24.24 32.81
-                L 25.64 34.46
-                L 27.20 35.64
-                L 28.87 36.35
-                L 30.64 36.59
-                L 32.59 36.29
-                L 34.32 35.39
-                L 35.84 33.89
-                M 50.41 32.34
-                L 50.09 30.04
-                L 49.72 27.77
-                L 49.27 25.52
-                L 47.01 15.13
-                L 54.05 15.13
-                L 51.89 24.94
-                L 51.29 27.75
-                L 50.80 30.22
-                L 50.41 32.34
-                M 51.99 36.00
-                L 60.40 0.59
-                L 57.29 0.59
-                L 54.90 11.32
-                L 46.21 11.32
-                L 43.97 0.59
-                L 41.07 0.59
-                L 48.99 36.00
-                L 51.99 36.00
-                M 78.13 36.00
-                L 78.13 31.85
-                L 71.32 31.85
-                L 71.32 0.59
-                L 68.58 0.59
-                L 68.58 31.85
-                L 61.78 31.85
-                L 61.78 36.00
-                L 78.13 36.00
-              "
-            />
-          </g>
-        </svg>
-        {/* Optional texture overlay */}
-        <div
-          className="absolute inset-0 bg-cover bg-center mix-blend-screen opacity-30 pointer-events-none"
-          style={{
-            backgroundImage:
-              'url("https://cdn.cosmos.so/00c1aedd-73e6-4e74-a278-2252a626bbff?format=jpeg")',
-          }}
-        />
+    <footer className="relative z-20 bg-black text-white pt-16 pb-8 px-4 border-t border-[#f0abfc]/20">
+      <div className="max-w-7xl mx-auto">
+        {/* Main footer grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          {/* Brand & description */}
+          <div className="space-y-4">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-[#f0abfc] to-[#e879f9] bg-clip-text text-transparent">
+              NCAT
+            </h2>
+            <p className="text-gray-300 text-sm leading-relaxed">
+              National Conference Of Applied Technology. We craft innovative digital experiences that push boundaries and inspire change.
+            </p>
+            <div className="flex space-x-4 pt-2">
+              <a href="#" className="text-gray-400 hover:text-[#f0abfc] transition-colors" aria-label="Twitter">
+                <FaTwitter size={20} />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-[#f0abfc] transition-colors" aria-label="LinkedIn">
+                <FaLinkedin size={20} />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-[#f0abfc] transition-colors" aria-label="GitHub">
+                <FaGithub size={20} />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-[#f0abfc] transition-colors" aria-label="Instagram">
+                <FaInstagram size={20} />
+              </a>
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4 text-[#f0abfc]">Quick Links</h3>
+            <ul className="space-y-2 text-sm">
+              <li><a href="#Hero" className="text-gray-300 hover:text-white transition-colors">Home</a></li>
+              <li><a href="#" className="text-gray-300 hover:text-white transition-colors">About Us</a></li>
+              <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Events</a></li>
+              <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Speakers</a></li>
+              <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Partners</a></li>
+            </ul>
+          </div>
+
+          {/* Contact Info */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4 text-[#f0abfc]">Contact</h3>
+            <ul className="space-y-3 text-sm">
+              <li className="flex items-start gap-3">
+                <FaEnvelope className="text-[#f0abfc] mt-0.5" />
+                <a href="mailto:hi@ncat.com" className="text-gray-300 hover:text-white transition-colors">hi@ncat.com</a>
+              </li>
+              <li className="flex items-start gap-3">
+                <FaPhoneAlt className="text-[#f0abfc] mt-0.5" />
+                <span className="text-gray-300">+92 51 234 5678</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <FaMapMarkerAlt className="text-[#f0abfc] mt-0.5" />
+                <span className="text-gray-300">Islamabad, Pakistan</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Newsletter / CTA */}
+          
+        </div>
+
+        {/* Copyright line */}
+        <div className="border-t border-gray-800 pt-6 text-center text-gray-400 text-sm">
+          <p>&copy; {new Date().getFullYear()} NCAT. All rights reserved.</p>
+        </div>
       </div>
-    </section>
+    </footer>
   );
 };
 

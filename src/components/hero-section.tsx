@@ -21,7 +21,7 @@ const HeroSection = () => {
               <strong className="text-white font-semibold">NCAT</strong> isn’t just another creative studio—we’re a
               collective of forward‑thinking designers, developers, and strategists who believe in building digital
               experiences that matter. Our name stands for{" "}
-              <span className="text-[#f0abfc] font-medium">Next‑Gen Creative Agency & Technology</span>, and
+              <span className="text-[#f0abfc] font-medium">National Conference Of Applied Technology</span>, and
               that’s exactly what we deliver.
             </p>
             <p>

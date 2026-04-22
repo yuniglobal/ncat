@@ -1,12 +1,13 @@
+// src/pages/Home.tsx
 import { lazy, Suspense } from "react";
 import HeroSection from "@/components/hero-section";
 import Footer from "@/components/footer";
-import OrganizerCards from "@/components/OrganizerCards";
+import TiltCardGroup from "@/components/TiltCardGroup"; // ✅ Correct import
 import Slider from "@/components/Slider";
 import GallerySection1 from "@/components/ImageGrid1";
 import GallerySection2 from "@/components/ImageGrid2";
 import StaircaseHoverList from "@/components/StaircaseHoverList";
-import TeamMembers from "@/components/TeamMembers";  // 👈 Import the team component
+import TeamMembers from "@/components/TeamMembers";
 
 const ParticleField = lazy(() => import("@/components/ParticleField"));
 
@@ -33,7 +34,7 @@ const Home = () => {
     'https://picsum.photos/id/176/100/100',
   ];
 
-  // Detailed agenda items with time, title, and subtitle
+  // Detailed agenda items
   const agendaItems = [
     {
       time: "09:00 – 09:30",
@@ -112,6 +113,23 @@ const Home = () => {
     },
   ];
 
+  const organizerCards = [
+    {
+      imageSrc: "src/assets/logo.png",      // replace with actual logo
+      title: "Yuni",
+      buttonText: "Learn More",
+      buttonLink: "#",
+      variant: "green" as const,            // ✅ green
+    },
+    {
+      imageSrc: "/logos/stellar-logo.png",  // replace with actual logo
+      title: "Stellar",
+      buttonText: "View Events",
+      buttonLink: "#",
+      variant: "orange" as const,           // ✅ light orange
+    },
+  ];
+
   return (
     <div className="bg-black">
       {/* Hero section with particles */}
@@ -134,7 +152,7 @@ const Home = () => {
               NCAT
             </h1>
             <p className="text-white/70 text-center text-sm md:text-lg lg:text-xl font-light tracking-widest uppercase">
-              Next‑Gen Creative Agency & Technology
+              National Conference Of Applied Technology
             </p>
           </div>
         </div>
@@ -143,7 +161,16 @@ const Home = () => {
       {/* Main content */}
       <div className="relative z-10 bg-black">
         <HeroSection />
-        <OrganizerCards />
+
+        <div className="text-center mb-10">
+          <h2 className="text-[#f0abfc] text-3xl md:text-4xl font-bold drop-shadow-md">
+            Organized By
+          </h2>
+        </div>
+
+        <div className="mb-20"> {/* Adjust mb-20 to desired spacing */}
+          <TiltCardGroup cards={organizerCards} showThemeToggle={true} />
+        </div>
 
         <div className="text-center mb-10">
           <h2 className="text-[#f0abfc] text-3xl md:text-4xl font-bold drop-shadow-md">
@@ -198,34 +225,16 @@ const Home = () => {
           <StaircaseHoverList items={agendaItems} title="" />
         </div>
 
-        <div className="text-center mb-10 mt-70">
+        <div className="text-center mb-10 mt-50">
           <h2 className="text-[#f0abfc] text-3xl md:text-4xl font-bold drop-shadow-md">
             Organizing Team
           </h2>
         </div>
 
-        {/* 👇 Team Members component inserted here */}
-        <div className="max-w-6xl mx-auto px-4">
+        {/* Team Members component */}
+        <div className="max-w-6xl mx-auto px-4 mb-40">
           <TeamMembers />
         </div>
-
-        {/* CTA Section */}
-        <section className="py-20 md:py-28 px-4 text-center">
-          <div className="flex flex-col items-center gap-3">
-            <a
-              href="mailto:hi@filip.fyi"
-              className="text-[#f0abfc] hover:text-[#e879f9] text-2xl md:text-3xl lg:text-4xl font-bold uppercase tracking-wider transition-colors"
-            >
-              GET IN TOUCH
-            </a>
-            <a
-              href="mailto:hi@filip.fyi"
-              className="text-gray-300 hover:text-white text-lg md:text-xl transition-colors"
-            >
-              hi@filip.fyi
-            </a>
-          </div>
-        </section>
 
         <Footer />
       </div>

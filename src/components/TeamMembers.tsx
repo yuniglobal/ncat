@@ -97,7 +97,6 @@ const TeamMembers: React.FC = () => {
         @import url("https://fonts.googleapis.com/css2?family=Lato:wght@300;400&display=swap");
 
         .team-showcase {
-          /* Colors matching StaircaseHoverList */
           --accent-light: #f0abfc;
           --accent-hover: #e879f9;
           --dark-bg-start: #1e1028;
@@ -129,7 +128,6 @@ const TeamMembers: React.FC = () => {
           list-style: none;
         }
 
-        /* Card styling – dark gradient with left accent border */
         .team-showcase .member {
           margin: 1.5em 0 0.5em;
           padding: 0.73em;
@@ -150,7 +148,6 @@ const TeamMembers: React.FC = () => {
           border-right: 6px solid var(--accent-light);
         }
 
-        /* Thumbnail with gradient border */
         .team-showcase .thumb {
           width: 13vmin;
           height: 13vmin;
@@ -187,7 +184,6 @@ const TeamMembers: React.FC = () => {
           transition: var(--trans);
         }
 
-        /* Hover effects */
         .team-showcase .member:hover {
           transform: scale(1);
           transition: var(--trans);
@@ -215,7 +211,6 @@ const TeamMembers: React.FC = () => {
           transition: var(--trans);
         }
 
-        /* Description text */
         .team-showcase .description {
           padding-top: 1vmin;
         }
@@ -228,7 +223,6 @@ const TeamMembers: React.FC = () => {
           line-height: 1.4;
         }
 
-        /* Member name – bright and visible */
         .team-showcase h3 {
           background: linear-gradient(182deg, #fff0 60%, var(--dark-bg-end) 0 100%);
           display: inline-block;
@@ -263,7 +257,6 @@ const TeamMembers: React.FC = () => {
           color: var(--accent-hover);
         }
 
-        /* CO-FUNDER badge */
         .team-showcase .co-funder:after {
           content: "CO-FUNDER";
           font-size: 0.7em;
@@ -285,7 +278,6 @@ const TeamMembers: React.FC = () => {
           transform: rotate(-3deg);
         }
 
-        /* Link button */
         .team-showcase .description p a {
           display: inline-block;
           margin: 0.5em 0 0 0;
@@ -307,39 +299,112 @@ const TeamMembers: React.FC = () => {
           font-weight: bold;
         }
 
-        /* Clearfix */
         .team-showcase .member:after {
           content: "";
           display: table;
           clear: both;
         }
 
-        /* Responsive */
+        /* ===== MOBILE OPTIMIZATIONS – BIGGER THUMBNAILS ===== */
         @media (max-width: 768px) {
           .team-showcase .content {
-            width: 95vmin;
+            width: 100%;
+            padding: 0 1rem;
           }
+
           .team-showcase .team {
-            padding-left: 1em;
+            padding: 1rem 0 1rem 1rem;
           }
+
+          /* Remove scaling to avoid overlap and ensure bigger pictures */
           .team-showcase .member {
-            transform: scale(0.95);
+            transform: scale(1);
+            margin: 1.5rem 0;
+            padding: 1rem;
+            border-left-width: 4px;
+            border-right-width: 0;
           }
+
+          .team-showcase .member:nth-of-type(even) {
+            border-right-width: 4px;
+            border-left-width: 0;
+          }
+
+          /* BIGGER THUMBNAIL: fixed size 100px on mobile */
           .team-showcase .thumb {
-            width: 15vmin;
-            height: 15vmin;
-            margin-left: -2em;
+            width: 100px;
+            height: 100px;
+            margin-left: -1.5rem;
+            margin-right: 1rem;
+          }
+
+          .team-showcase .member:nth-of-type(even) .thumb {
+            margin-left: 1rem;
+            margin-right: -1.5rem;
+          }
+
+          /* Reposition name tag to be below thumbnail, not overlapping */
+          .team-showcase h3 {
+            position: static;
+            display: inline-block;
+            margin-top: 0.5rem;
+            margin-bottom: 0.75rem;
+            left: auto;
+            right: auto;
+            transform: rotate(0deg);
+            font-size: 1.25rem;
+            padding: 0.3rem 1rem;
+          }
+
+          .team-showcase .member:nth-of-type(even) h3 {
+            left: auto;
+            right: auto;
+            transform: rotate(0deg);
+            text-align: left;
+          }
+
+          /* Adjust text padding */
+          .team-showcase .description p {
+            padding: 0 0.5rem;
+            font-size: 0.9rem;
+          }
+
+          .team-showcase .description {
+            padding-top: 0;
+          }
+
+          /* Badge positioning */
+          .team-showcase .co-funder:after,
+          .team-showcase .co-funder:nth-of-type(even):after {
+            top: -1rem;
+            right: 1rem;
+            left: auto;
+            transform: rotate(0deg);
+            font-size: 0.7rem;
+            padding: 0.2rem 0.8rem;
+          }
+
+          /* Hover effect on mobile (simple lift) */
+          .team-showcase .member:hover {
+            transform: translateY(-3px);
+          }
+        }
+
+        /* Extra small devices (<=480px) – make thumbnail even bigger */
+        @media (max-width: 480px) {
+          .team-showcase .thumb {
+            width: 85px;
+            height: 85px;
+            margin-left: -1rem;
           }
           .team-showcase .member:nth-of-type(even) .thumb {
-            margin-right: -2em;
+            margin-right: -1rem;
           }
           .team-showcase h3 {
-            font-size: 1.1em;
-            margin-top: -1.8em;
-            left: 7vmin;
+            font-size: 1.1rem;
           }
-          .team-showcase .member:nth-of-type(even) h3 {
-            right: 7vmin;
+          .team-showcase .description p {
+            font-size: 0.85rem;
           }
         }
       `}</style>
