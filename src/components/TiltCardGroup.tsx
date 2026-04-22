@@ -39,12 +39,15 @@ const TiltCard: React.FC<TiltCardProps & { isMobile?: boolean }> = ({
         speed: 300,
         easing: "cubic-bezier(.03,.98,.52,.99)",
         scale: 1.05,
+        glare: false,
+        "max-glare": 0,
+        gyroscope: false, // disable gyro for better performance
       });
     }
   }, [isMobile]);
 
   const variantColors: Record<string, string> = {
-    green: "#166534", // dark green
+    green: "#166534",
     blue: "#1da3c3",
     red: "#eb0e2f",
     orange: "#f97316",
@@ -54,15 +57,11 @@ const TiltCard: React.FC<TiltCardProps & { isMobile?: boolean }> = ({
   const buttonBg = variantColors[variant];
   const gradient = `radial-gradient(ellipse at right top, ${borderColor}ed 0%, var(--box-bg) 47%, var(--box-bg) 100%)`;
 
-  // Mobile styles: simpler, no 3D transforms, smaller size
-  const mobileStyles = isMobile
-    ? {
-        transformStyle: "flat" as const,
-        transform: "none",
-      }
-    : {
-        transformStyle: "preserve-3d" as const,
-      };
+  // Base transform styles
+  const getBaseTransform = () => {
+    if (isMobile) return "none";
+    return "translate3d(0,0,0)";
+  };
 
   return (
     <div
@@ -72,18 +71,22 @@ const TiltCard: React.FC<TiltCardProps & { isMobile?: boolean }> = ({
       } rounded-[20px] preserve-3d font-['Poppins',sans-serif] ${className}`}
       style={{
         background: gradient,
-        ...mobileStyles,
+        transformStyle: isMobile ? "flat" : "preserve-3d",
+        transform: getBaseTransform(),
+        willChange: isMobile ? "auto" : "transform",
       }}
     >
-      {/* Background text "NIKE" */}
-      <div className="absolute top-5 left-5 text-[6em] font-black italic opacity-0 transition-opacity duration-500 text-[var(--card-bg-text)] group-hover:opacity-[0.04] pointer-events-none">
-        NIKE
-      </div>
-
-      {/* Background text "SHOES" */}
-      <div className="absolute bottom-5 right-5 text-[4.5em] font-black italic opacity-0 transition-opacity duration-500 text-[var(--card-bg-text)] group-hover:opacity-[0.04] pointer-events-none">
-        SHOES
-      </div>
+      {/* Background text "NIKE" - only on desktop */}
+      {!isMobile && (
+        <>
+          <div className="absolute top-5 left-5 text-[6em] font-black italic opacity-0 transition-opacity duration-500 text-[var(--card-bg-text)] group-hover:opacity-[0.04] pointer-events-none">
+            NIKE
+          </div>
+          <div className="absolute bottom-5 right-5 text-[4.5em] font-black italic opacity-0 transition-opacity duration-500 text-[var(--card-bg-text)] group-hover:opacity-[0.04] pointer-events-none">
+            SHOES
+          </div>
+        </>
+      )}
 
       {/* Title */}
       <h2
@@ -93,7 +96,8 @@ const TiltCard: React.FC<TiltCardProps & { isMobile?: boolean }> = ({
             : "opacity-0 group-hover:top-10 group-hover:opacity-100"
         }`}
         style={{
-          transform: isMobile ? "translate3d(0,0,0)" : "translate3d(0,0,75px)",
+          transform: isMobile ? "none" : "translate3d(0,0,75px)",
+          willChange: isMobile ? "auto" : "transform, opacity",
         }}
       >
         {title}
@@ -109,9 +113,8 @@ const TiltCard: React.FC<TiltCardProps & { isMobile?: boolean }> = ({
         }`}
         style={{
           background: buttonBg,
-          transform: isMobile
-            ? "translate3d(-50%,0,0)"
-            : "translate3d(-50%,0,75px)",
+          transform: isMobile ? "translate(-50%, 0)" : "translate3d(-50%,0,75px)",
+          willChange: isMobile ? "auto" : "transform, opacity",
         }}
       >
         {buttonText}
@@ -125,8 +128,9 @@ const TiltCard: React.FC<TiltCardProps & { isMobile?: boolean }> = ({
         style={{
           background: buttonBg,
           transform: isMobile
-            ? "translate3d(-50%,-50%,0)"
+            ? "translate(-50%, -50%)"
             : "translate3d(-50%,-50%,0px)",
+          willChange: isMobile ? "auto" : "transform",
         }}
       />
 
@@ -134,13 +138,16 @@ const TiltCard: React.FC<TiltCardProps & { isMobile?: boolean }> = ({
       <img
         src={imageSrc}
         alt={imageAlt}
+        loading="lazy"
+        decoding="async"
         className={`absolute top-1/2 left-1/2 max-w-[300px] transition-all duration-500 z-[11] -rotate-[15deg] ${
           !isMobile && "group-hover:translate-z-right"
         }`}
         style={{
           transform: isMobile
-            ? "translate3d(calc(-50% + 80px), -50%, 0px) rotate(-15deg)"
+            ? "translate(calc(-50% + 80px), -50%) rotate(-15deg)"
             : "translate3d(calc(-50% + 80px), -50%, 0px) rotate(-15deg)",
+          willChange: isMobile ? "auto" : "transform",
         }}
       />
 
@@ -169,6 +176,7 @@ const TiltCardGroup: React.FC<TiltCardGroupProps> = ({
 }) => {
   const [isLight, setIsLight] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
     const html = document.documentElement;
@@ -183,14 +191,31 @@ const TiltCardGroup: React.FC<TiltCardGroupProps> = ({
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
+    const checkReducedMotion = () => {
+      setPrefersReducedMotion(
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      );
+    };
+
     checkMobile();
+    checkReducedMotion();
+
     window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    const motionMedia = window.matchMedia("(prefers-reduced-motion: reduce)");
+    motionMedia.addEventListener("change", checkReducedMotion);
+
+    return () => {
+      window.removeEventListener("resize", checkMobile);
+      motionMedia.removeEventListener("change", checkReducedMotion);
+    };
   }, []);
+
+  // If user prefers reduced motion, treat as mobile (no tilt)
+  const shouldUseSimple = isMobile || prefersReducedMotion;
 
   return (
     <>
-      {/* Embedded styles for CSS variables and custom utilities */}
+      {/* Optimized styles */}
       <style>{`
         :root {
           --main-bg: #131313;
@@ -210,32 +235,42 @@ const TiltCardGroup: React.FC<TiltCardGroupProps> = ({
           transform-style: preserve-3d;
         }
 
-        /* Hover translation utilities (only for desktop) */
+        /* Hover translation utilities - only for desktop and no reduced motion */
         @media (min-width: 768px) {
-          .group:hover .group-hover\\:top-10 {
-            top: 2.5rem;
-          }
-          .group:hover .group-hover\\:opacity-100 {
-            opacity: 1;
-          }
-          .group:hover .group-hover\\:bottom-8 {
-            bottom: 2rem;
-          }
-          .group:hover .group-hover\\:opacity-\\[0\\.04\\] {
-            opacity: 0.04;
-          }
-          .group:hover .group-hover\\:translate-z-\\[35px\\] {
-            transform: translate3d(-50%, -50%, 35px) !important;
-          }
-          .group:hover .group-hover\\:translate-z-right {
-            transform: translate3d(calc(-50% + 15px), -50%, 100px) rotate(-15deg) !important;
+          @media (prefers-reduced-motion: no-preference) {
+            .group:hover .group-hover\\:top-10 {
+              top: 2.5rem;
+            }
+            .group:hover .group-hover\\:opacity-100 {
+              opacity: 1;
+            }
+            .group:hover .group-hover\\:bottom-8 {
+              bottom: 2rem;
+            }
+            .group:hover .group-hover\\:opacity-\\[0\\.04\\] {
+              opacity: 0.04;
+            }
+            .group:hover .group-hover\\:translate-z-\\[35px\\] {
+              transform: translate3d(-50%, -50%, 35px) !important;
+            }
+            .group:hover .group-hover\\:translate-z-right {
+              transform: translate3d(calc(-50% + 15px), -50%, 100px) rotate(-15deg) !important;
+            }
           }
         }
 
-        /* Fallback for browsers that don't support mask-composite */
+        /* Fallback for mask-composite */
         .tilt-border {
           -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
           -webkit-mask-composite: destination-out;
+        }
+
+        /* Performance: promote animated elements to own layer on desktop */
+        @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+          .tilt-card,
+          .tilt-card * {
+            backface-visibility: hidden;
+          }
         }
       `}</style>
 
@@ -259,11 +294,14 @@ const TiltCardGroup: React.FC<TiltCardGroupProps> = ({
         </button>
       )}
 
-      {/* Responsive container */}
       <div className="flex justify-center items-center">
         <div className="relative flex justify-center items-center flex-wrap w-full max-w-[1200px] preserve-3d px-4">
           {cards.map((card, index) => (
-            <TiltCard key={index} {...card} isMobile={isMobile} />
+            <TiltCard
+              key={index}
+              {...card}
+              isMobile={shouldUseSimple}
+            />
           ))}
         </div>
       </div>
