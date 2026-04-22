@@ -1,6 +1,5 @@
 // src/components/TiltCardGroup.tsx
 import React, { useRef, useEffect, useState } from "react";
-import VanillaTilt from "vanilla-tilt";
 
 // ===== Types =====
 export interface TiltCardProps {
@@ -15,7 +14,6 @@ export interface TiltCardProps {
 
 interface TiltCardGroupProps {
   cards: TiltCardProps[];
-  // showThemeToggle prop removed – no longer needed
 }
 
 // ===== Single Card Component =====
@@ -32,19 +30,26 @@ const TiltCard: React.FC<TiltCardProps & { isMobile?: boolean }> = ({
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Only initialize tilt on non-mobile devices
-    if (!isMobile && cardRef.current) {
-      VanillaTilt.init(cardRef.current, {
-        max: 15,
-        speed: 300,
-        easing: "cubic-bezier(.03,.98,.52,.99)",
-        scale: 1.05,
+    // Only initialize tilt on non‑mobile devices, and only if reduced motion is not preferred
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    if (!isMobile && !prefersReducedMotion && cardRef.current) {
+      // Dynamically import VanillaTilt to keep mobile bundle lean
+      import("vanilla-tilt").then((VanillaTilt) => {
+        VanillaTilt.default.init(cardRef.current!, {
+          max: 15,
+          speed: 300,
+          easing: "cubic-bezier(.03,.98,.52,.99)",
+          scale: 1.05,
+        });
       });
     }
   }, [isMobile]);
 
   const variantColors: Record<string, string> = {
-    green: "#166534", // dark green
+    green: "#166534",
     blue: "#1da3c3",
     red: "#eb0e2f",
     orange: "#f97316",
@@ -54,7 +59,7 @@ const TiltCard: React.FC<TiltCardProps & { isMobile?: boolean }> = ({
   const buttonBg = variantColors[variant];
   const gradient = `radial-gradient(ellipse at right top, ${borderColor}ed 0%, var(--box-bg) 47%, var(--box-bg) 100%)`;
 
-  // Mobile styles: simpler, no 3D transforms, smaller size
+  // Mobile: flat rendering, no 3D transforms
   const mobileStyles = isMobile
     ? {
         transformStyle: "flat" as const,
@@ -68,19 +73,22 @@ const TiltCard: React.FC<TiltCardProps & { isMobile?: boolean }> = ({
     <div
       ref={cardRef}
       className={`tilt-card group relative ${
-        isMobile ? "w-[280px] h-[380px] m-4" : "w-[300px] h-[400px] m-10"
+        // Responsive sizing: full width on very small screens, fixed width on larger
+        isMobile
+          ? "w-full max-w-[280px] h-[380px] my-4 mx-auto"
+          : "w-[300px] h-[400px] m-10"
       } rounded-[20px] preserve-3d font-['Poppins',sans-serif] ${className}`}
       style={{
         background: gradient,
         ...mobileStyles,
       }}
     >
-      {/* Background text "NIKE" */}
+      {/* Background "NIKE" text */}
       <div className="absolute top-5 left-5 text-[6em] font-black italic opacity-0 transition-opacity duration-500 text-[var(--card-bg-text)] group-hover:opacity-[0.04] pointer-events-none">
         NIKE
       </div>
 
-      {/* Background text "SHOES" */}
+      {/* Background "SHOES" text */}
       <div className="absolute bottom-5 right-5 text-[4.5em] font-black italic opacity-0 transition-opacity duration-500 text-[var(--card-bg-text)] group-hover:opacity-[0.04] pointer-events-none">
         SHOES
       </div>
@@ -167,17 +175,19 @@ const TiltCardGroup: React.FC<TiltCardGroupProps> = ({ cards }) => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+    // Use matchMedia for better performance and accuracy
+    const mql = window.matchMedia("(max-width: 767px)");
+    const handleChange = (e: MediaQueryListEvent | MediaQueryList) => {
+      setIsMobile(e.matches);
     };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    handleChange(mql); // initial check
+    mql.addEventListener("change", handleChange);
+    return () => mql.removeEventListener("change", handleChange);
   }, []);
 
   return (
     <>
-      {/* Embedded styles for CSS variables and custom utilities */}
+      {/* Embedded styles with hover and motion‑sensitive media queries */}
       <style>{`
         :root {
           --main-bg: #131313;
@@ -190,8 +200,8 @@ const TiltCardGroup: React.FC<TiltCardGroupProps> = ({ cards }) => {
           transform-style: preserve-3d;
         }
 
-        /* Hover translation utilities (only for desktop) */
-        @media (min-width: 768px) {
+        /* Only apply hover‑based 3D effects on devices with a fine pointer (mouse/trackpad) */
+        @media (hover: hover) {
           .group:hover .group-hover\\:top-10 {
             top: 2.5rem;
           }
@@ -212,16 +222,26 @@ const TiltCardGroup: React.FC<TiltCardGroupProps> = ({ cards }) => {
           }
         }
 
-        /* Fallback for browsers that don't support mask-composite */
+        /* Respect user preference for reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+          .tilt-card,
+          .tilt-card * {
+            transition-duration: 0.01ms !important;
+            animation-duration: 0.01ms !important;
+            transform: none !important;
+          }
+        }
+
+        /* Fallback for browsers that don't support mask‑composite */
         .tilt-border {
           -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
           -webkit-mask-composite: destination-out;
         }
       `}</style>
 
-      {/* Responsive container */}
-      <div className="flex justify-center items-center">
-        <div className="relative flex justify-center items-center flex-wrap w-full max-w-[1200px] preserve-3d px-4">
+      {/* Responsive container – prevents overflow on small screens */}
+      <div className="flex justify-center items-center w-full px-4">
+        <div className="relative flex justify-center items-center flex-wrap w-full max-w-[1200px] preserve-3d">
           {cards.map((card, index) => (
             <TiltCard key={index} {...card} isMobile={isMobile} />
           ))}
@@ -231,4 +251,4 @@ const TiltCardGroup: React.FC<TiltCardGroupProps> = ({ cards }) => {
   );
 };
 
-export default TiltCardGroup;
+export default TiltCardGroup; 

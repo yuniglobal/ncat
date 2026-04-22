@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import { Link } from "react-router";
 import { cn } from "@/lib/utils";
@@ -156,7 +156,7 @@ export function TubeLightNavBar({ items, className, firstName }: NavBarProps) {
       {/* ----- MOBILE NAVIGATION ----- */}
       <div
         className={cn(
-          "block lg:hidden fixed z-[50] top-0 left-4 right-4 md:left-20 md:right-20 mb-6 md:pt-8 pt-4",
+          "block lg:hidden fixed z-[50] top-0 left-4 right-4 md:left-20 md:right-20 md:pt-8 pt-4 w-auto",
           className
         )}
       >
@@ -168,14 +168,14 @@ export function TubeLightNavBar({ items, className, firstName }: NavBarProps) {
           }}
         >
           {/* Profile */}
-          <a href="/#Hero" className="flex items-center gap-2">
+          <a href="/#Hero" className="flex items-center gap-2 flex-1">
             <img
-              className="w-10 md:w-12 aspect-square object-cover object-[center_30%] rounded-full border-2"
+              className="w-10 md:w-12 aspect-square object-cover object-[center_30%] rounded-full border-2 flex-shrink-0"
               style={{ borderColor: colors.lightPink }}
               src={profilePhoto}
               alt={`${fullName} Profile Photo`}
             />
-            <p className="font-myNameFont text-lg md:text-xl" style={{ color: colors.lightPink }}>
+            <p className="font-myNameFont text-lg md:text-xl truncate" style={{ color: colors.lightPink }}>
               {firstName}
             </p>
           </a>
@@ -183,7 +183,7 @@ export function TubeLightNavBar({ items, className, firstName }: NavBarProps) {
           {/* Menu Toggle Only (WhatsApp removed) */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="px-2 py-2 rounded-full"
+            className="px-2 py-2 rounded-full flex-shrink-0"
             style={{ backgroundColor: colors.magenta }}
             aria-label="Toggle menu"
           >
@@ -196,59 +196,63 @@ export function TubeLightNavBar({ items, className, firstName }: NavBarProps) {
         </div>
 
         {/* Mobile Dropdown Menu */}
-        {isMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="mt-3 w-full"
-          >
-            <div
-              className="p-2.5 flex flex-col border backdrop-blur-sm rounded-2xl gap-2"
-              style={{
-                borderColor: colors.pink,
-                backgroundColor: "rgba(0, 7, 111, 0.5)",
-              }}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              key="mobile-menu"
+              initial={{ opacity: 0, y: -10, scaleY: 0.95 }}
+              animate={{ opacity: 1, y: 0, scaleY: 1 }}
+              exit={{ opacity: 0, y: -10, scaleY: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="mt-3 w-full origin-top"
             >
-              {items.map((item) => {
-                const Icon = item.icon;
-                const isActive = activeTab === item.name;
-
-                return (
-                  <a
-                    key={item.name}
-                    href={item.url}
-                    onClick={() => {
-                      setActiveTab(item.name);
-                      setIsMenuOpen(false);
-                    }}
-                    className={cn(
-                      "relative text-sm md:text-base font-myMainFont font-semibold px-4.5 py-2.5 rounded-full transition-all flex items-center gap-2",
-                      isActive
-                        ? "text-white"
-                        : "text-white/80 hover:text-white hover:bg-white/10"
-                    )}
-                    style={{
-                      backgroundColor: isActive ? colors.magenta : "transparent",
-                    }}
-                  >
-                    <Icon size={18} strokeWidth={2.5} />
-                    <span>{item.name}</span>
-                  </a>
-                );
-              })}
-
-              {/* Register Link inside Mobile Menu */}
-              <Link
-                to="/register"
-                onClick={() => setIsMenuOpen(false)}
-                className="w-full"
+              <div
+                className="p-2.5 flex flex-col border backdrop-blur-sm rounded-2xl gap-2 z-[51]"
+                style={{
+                  borderColor: colors.pink,
+                  backgroundColor: "rgba(0, 7, 111, 0.5)",
+                }}
               >
-                <ArrowUpIcon className="w-full justify-center" />
-              </Link>
-            </div>
-          </motion.div>
-        )}
+                {items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.name;
+
+                  return (
+                    <a
+                      key={item.name}
+                      href={item.url}
+                      onClick={() => {
+                        setActiveTab(item.name);
+                        setIsMenuOpen(false);
+                      }}
+                      className={cn(
+                        "relative text-sm md:text-base font-myMainFont font-semibold px-4.5 py-2.5 rounded-full transition-all flex items-center gap-2",
+                        isActive
+                          ? "text-white"
+                          : "text-white/80 hover:text-white hover:bg-white/10"
+                      )}
+                      style={{
+                        backgroundColor: isActive ? colors.magenta : "transparent",
+                      }}
+                    >
+                      <Icon size={18} strokeWidth={2.5} />
+                      <span>{item.name}</span>
+                    </a>
+                  );
+                })}
+
+                {/* Register Link inside Mobile Menu */}
+                <Link
+                  to="/register"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="w-full flex justify-center"
+                >
+                  <ArrowUpIcon className="justify-center" />
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
