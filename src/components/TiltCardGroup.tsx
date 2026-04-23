@@ -45,7 +45,21 @@ const TiltCard: React.FC<TiltCardProps & { isMobile?: boolean }> = ({
           scale: 1.05,
         });
       });
+    } else if (isMobile && cardRef.current) {
+      // Destroy VanillaTilt on mobile and reset transforms
+      if ((cardRef.current as any).vanillaTilt) {
+        (cardRef.current as any).vanillaTilt.destroy();
+      }
+      cardRef.current.style.transform = "none";
+      cardRef.current.style.transformStyle = "flat";
     }
+
+    return () => {
+      // Cleanup on unmount
+      if (cardRef.current && (cardRef.current as any).vanillaTilt) {
+        (cardRef.current as any).vanillaTilt.destroy();
+      }
+    };
   }, [isMobile]);
 
   const variantColors: Record<string, string> = {
@@ -62,12 +76,12 @@ const TiltCard: React.FC<TiltCardProps & { isMobile?: boolean }> = ({
   // Mobile: flat rendering, no 3D transforms
   const mobileStyles = isMobile
     ? {
-        transformStyle: "flat" as const,
-        transform: "none",
-      }
+      transformStyle: "flat" as const,
+      transform: "none",
+    }
     : {
-        transformStyle: "preserve-3d" as const,
-      };
+      transformStyle: "preserve-3d" as const,
+    };
 
   return (
     <div
@@ -77,7 +91,7 @@ const TiltCard: React.FC<TiltCardProps & { isMobile?: boolean }> = ({
         isMobile
           ? "w-full max-w-[280px] h-[380px] my-4 mx-auto"
           : "w-[300px] h-[400px] m-10"
-      } rounded-[20px] preserve-3d font-['Poppins',sans-serif] ${className}`}
+        } rounded-[20px] ${isMobile ? "" : "preserve-3d"} font-['Poppins',sans-serif] ${className}`}
       style={{
         background: gradient,
         ...mobileStyles,
@@ -95,13 +109,12 @@ const TiltCard: React.FC<TiltCardProps & { isMobile?: boolean }> = ({
 
       {/* Title */}
       <h2
-        className={`absolute top-0 left-0 w-full text-center text-[var(--name-color)] transition-all duration-500 z-10 ${
-          isMobile
-            ? "opacity-100 top-10"
-            : "opacity-0 group-hover:top-10 group-hover:opacity-100"
-        }`}
+        className={`absolute top-0 left-0 w-full text-center text-[var(--name-color)] transition-all duration-500 z-10 ${isMobile
+          ? "opacity-100 top-10"
+          : "opacity-0 group-hover:top-10 group-hover:opacity-100"
+          }`}
         style={{
-          transform: isMobile ? "translate3d(0,0,0)" : "translate3d(0,0,75px)",
+          transform: "none",
         }}
       >
         {title}
@@ -110,16 +123,13 @@ const TiltCard: React.FC<TiltCardProps & { isMobile?: boolean }> = ({
       {/* Button */}
       <a
         href={buttonLink}
-        className={`absolute left-1/2 -translate-x-1/2 px-6 py-2 rounded-full text-white no-underline transition-all duration-500 z-10 ${
-          isMobile
-            ? "opacity-100 bottom-8"
-            : "opacity-0 bottom-0 group-hover:bottom-8 group-hover:opacity-100"
-        }`}
+        className={`absolute left-1/2 -translate-x-1/2 px-6 py-2 rounded-full text-white no-underline transition-all duration-500 z-10 ${isMobile
+          ? "opacity-100 bottom-8"
+          : "opacity-0 bottom-0 group-hover:bottom-8 group-hover:opacity-100"
+          }`}
         style={{
           background: buttonBg,
-          transform: isMobile
-            ? "translate3d(-50%,0,0)"
-            : "translate3d(-50%,0,75px)",
+          transform: "translateX(-50%)",
         }}
       >
         {buttonText}
@@ -127,14 +137,11 @@ const TiltCard: React.FC<TiltCardProps & { isMobile?: boolean }> = ({
 
       {/* Colored circle */}
       <div
-        className={`absolute top-1/2 left-1/2 w-[200px] h-[200px] rounded-full transition-all duration-500 z-10 ${
-          !isMobile && "group-hover:translate-z-[35px]"
-        }`}
+        className={`absolute top-1/2 left-1/2 w-[200px] h-[200px] rounded-full transition-all duration-500 z-10 ${!isMobile && "group-hover:translate-z-[35px]"
+          }`}
         style={{
           background: buttonBg,
-          transform: isMobile
-            ? "translate3d(-50%,-50%,0)"
-            : "translate3d(-50%,-50%,0px)",
+          transform: "translate(-50%, -50%)",
         }}
       />
 
@@ -142,12 +149,11 @@ const TiltCard: React.FC<TiltCardProps & { isMobile?: boolean }> = ({
       <img
         src={imageSrc}
         alt={imageAlt}
-        className={`absolute top-1/2 left-1/2 max-w-[300px] transition-all duration-500 z-[11] -rotate-[15deg] ${
-          !isMobile && "group-hover:translate-z-right"
-        }`}
+        className={`absolute top-1/2 left-1/2 max-w-[300px] transition-all duration-500 z-[11] -rotate-[15deg] ${!isMobile && "group-hover:translate-z-right"
+          }`}
         style={{
           transform: isMobile
-            ? "translate3d(calc(-50% + 80px), -50%, 0px) rotate(-15deg)"
+            ? "translate(calc(-50% + 80px), -50%) rotate(-15deg)"
             : "translate3d(calc(-50% + 80px), -50%, 0px) rotate(-15deg)",
         }}
       />
