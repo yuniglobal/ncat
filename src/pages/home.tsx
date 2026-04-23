@@ -169,8 +169,8 @@ const Home = () => {
           </h2>
         </div>
 
-        <div className="mb-20">
-          <TiltCardGroup cards={organizerCards} /> {/* ✅ Removed showThemeToggle */}
+        <div className="mb-20 overflow-hidden">
+          <TiltCardGroup cards={organizerCards} />
         </div>
 
         <div className="text-center mb-10">
