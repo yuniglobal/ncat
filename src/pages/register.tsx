@@ -1,664 +1,461 @@
-// // RegistrationPage.tsx
-// import React, { useState, ChangeEvent, FormEvent } from 'react';
+import { lazy, Suspense, useState } from "react";
+import type { FormEvent, ChangeEvent } from "react";
+import Footer from "@/components/footer";
 
-// type ParticipationType = 'audience' | 'ctf' | 'gaming' | 'pitching';
+// Types
+interface FormData {
+  fullName: string;
+  email: string;
+  phone: string;
+  participationType: string;
+  selectedCategory: string;
+  paymentMethod: string;
+  transactionId: string;
+  amountPaid: string;
+  paymentName: string;
+}
 
-// interface CTFCategories {
-//   web: boolean;
-//   crypto: boolean;
-//   forensics: boolean;
-//   osint: boolean;
-//   rev: boolean;
-//   binary: boolean;
-//   networking: boolean;
-//   general: boolean;
-//   other: string;
-// }
+interface FormErrors {
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  participationType?: string;
+  selectedCategory?: string;
+  paymentMethod?: string;
+  transactionId?: string;
+  amountPaid?: string;
+  paymentName?: string;
+}
 
-// interface FormData {
-//   // Common
-//   email: string;
-//   participationType: ParticipationType;
+const ParticleField = lazy(() => import("@/components/ParticleField"));
 
-//   // Audience
-//   audienceFullName: string;
-//   audienceEmail: string;
-//   audiencePhone: string;
-//   audienceUniversity: string;
-//   audienceDays: string;
-//   audienceCNIC: File | null;
+const RegisterPage: React.FC = () => {
+  // Google Sheets Web App URL
+  const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyBWJV9m4qe05JVkot_drIoLYM5ZhyTM8wTb3GLqVM-OyO-Wu5dtoPEiwIwBMcF8vm9/exec";
 
-//   // CTF
-//   ctfTeamName: string;
-//   ctfMemberCount: '2' | '3' | '4';
-//   ctfUniversity: string;
-//   ctfLeadName: string;
-//   ctfLeadEmail: string;
-//   ctfLeadPhone: string;
-//   ctfLeadCNIC: File | null;
-//   ctfMember2Name: string;
-//   ctfMember2CNIC: File | null;
-//   ctfMember3Name: string;
-//   ctfMember3CNIC: File | null;
-//   ctfMember4Name: string;
-//   ctfMember4CNIC: File | null;
-//   ctfSkillLevel: 'Beginner' | 'Intermediate' | 'Advanced';
-//   ctfCategories: CTFCategories;
-//   ctfSpecialReqs: string;
-//   ctfRulesAgreed: boolean;
+  // State
+  const [formData, setFormData] = useState<FormData>({
+    fullName: '',
+    email: '',
+    phone: '',
+    participationType: '',
+    selectedCategory: '',
+    paymentMethod: '',
+    transactionId: '',
+    amountPaid: '',
+    paymentName: '',
+  });
 
-//   // Gaming
-//   gamingFullName: string;
-//   gamingEmail: string;
-//   gamingPhone: string;
-//   gamingCity: string;
-//   gamingUniversity: string;
-//   gamingGame: 'PUBG' | 'TEKKEN 8' | 'FIFA 25' | '';
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({
+    type: null,
+    message: '',
+  });
 
-//   // Pitching
-//   pitchFullName: string;
-//   pitchEmail: string;
-//   pitchPhone: string;
-//   pitchCity: string;
-//   pitchUniversity: string;
-//   pitchDegree: string;
-//   pitchApplyAs: 'Individual' | 'Team' | '';
-// }
+  // Category options based on participation type
+  const getCategoryOptions = () => {
+    const options: { value: string; label: string }[] = [];
 
-// const initialCTFCategories: CTFCategories = {
-//   web: false,
-//   crypto: false,
-//   forensics: false,
-//   osint: false,
-//   rev: false,
-//   binary: false,
-//   networking: false,
-//   general: false,
-//   other: '',
-// };
+    switch (formData.participationType) {
+      case 'Audience':
+        options.push(
+          { value: 'Attendee Regular - PKR 2,000', label: 'Attendee Regular - PKR 2,000' },
+          { value: 'Attendee Student - PKR 1,200', label: 'Attendee Student - PKR 1,200 (with valid student ID)' }
+        );
+        break;
+      case 'CTF':
+        options.push({ value: 'CTF - PKR 2,500', label: 'CTF - PKR 2,500' });
+        break;
+      case 'Gaming':
+        options.push(
+          { value: 'Gaming PUBG - PKR 2,500', label: 'Gaming PUBG - PKR 2,500' },
+          { value: 'Gaming Tekken 8 - PKR 1,500', label: 'Gaming Tekken 8 - PKR 1,500' },
+          { value: 'Gaming FIFA - PKR 1,500', label: 'Gaming FIFA - PKR 1,500' }
+        );
+        break;
+      case 'Idea Pitching':
+        options.push({ value: 'Idea Pitching - PKR 2,000', label: 'Idea Pitching - PKR 2,000' });
+        break;
+      default:
+        return [];
+    }
+    return options;
+  };
 
-// const RegistrationPage: React.FC = () => {
-//   const [formData, setFormData] = useState<FormData>({
-//     email: '',
-//     participationType: 'audience',
-//     audienceFullName: '',
-//     audienceEmail: '',
-//     audiencePhone: '',
-//     audienceUniversity: '',
-//     audienceDays: '',
-//     audienceCNIC: null,
-//     ctfTeamName: '',
-//     ctfMemberCount: '2',
-//     ctfUniversity: '',
-//     ctfLeadName: '',
-//     ctfLeadEmail: '',
-//     ctfLeadPhone: '',
-//     ctfLeadCNIC: null,
-//     ctfMember2Name: '',
-//     ctfMember2CNIC: null,
-//     ctfMember3Name: '',
-//     ctfMember3CNIC: null,
-//     ctfMember4Name: '',
-//     ctfMember4CNIC: null,
-//     ctfSkillLevel: 'Beginner',
-//     ctfCategories: initialCTFCategories,
-//     ctfSpecialReqs: '',
-//     ctfRulesAgreed: false,
-//     gamingFullName: '',
-//     gamingEmail: '',
-//     gamingPhone: '',
-//     gamingCity: '',
-//     gamingUniversity: '',
-//     gamingGame: '',
-//     pitchFullName: '',
-//     pitchEmail: '',
-//     pitchPhone: '',
-//     pitchCity: '',
-//     pitchUniversity: '',
-//     pitchDegree: '',
-//     pitchApplyAs: '',
-//   });
+  // Validation
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
 
-//   const [errors, setErrors] = useState<Record<string, string>>({});
-//   const [isSubmitting, setIsSubmitting] = useState(false);
+    if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
+    if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
+    else if (!/^0[0-9]{10}$/.test(formData.phone.replace(/\s/g, ''))) newErrors.phone = 'Invalid phone number (e.g., 03001234567)';
+    if (!formData.participationType) newErrors.participationType = 'Please select participation type';
+    if (!formData.selectedCategory) newErrors.selectedCategory = 'Please select a category';
+    if (!formData.paymentMethod) newErrors.paymentMethod = 'Please select payment method';
+    if (!formData.transactionId.trim()) newErrors.transactionId = 'Transaction ID is required';
+    if (!formData.amountPaid) newErrors.amountPaid = 'Amount is required';
+    else if (parseFloat(formData.amountPaid) <= 0) newErrors.amountPaid = 'Amount must be greater than 0';
+    if (!formData.paymentName.trim()) newErrors.paymentName = 'Payment name is required';
 
-//   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-//     const { name, value, type } = e.target;
-//     if (type === 'checkbox') {
-//       const checked = (e.target as HTMLInputElement).checked;
-//       if (name.startsWith('ctfCategory_')) {
-//         const category = name.replace('ctfCategory_', '') as keyof CTFCategories;
-//         setFormData(prev => ({
-//           ...prev,
-//           ctfCategories: {
-//             ...prev.ctfCategories,
-//             [category]: checked,
-//           },
-//         }));
-//       } else if (name === 'ctfRulesAgreed') {
-//         setFormData(prev => ({ ...prev, ctfRulesAgreed: checked }));
-//       }
-//     } else if (type === 'radio') {
-//       setFormData(prev => ({ ...prev, [name]: value }));
-//     } else {
-//       setFormData(prev => ({ ...prev, [name]: value }));
-//     }
-//     // Clear error for this field
-//     if (errors[name]) {
-//       setErrors(prev => ({ ...prev, [name]: '' }));
-//     }
-//   };
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-//   const handleFileChange = (e: ChangeEvent<HTMLInputElement>, fieldName: keyof FormData) => {
-//     const file = e.target.files?.[0] || null;
-//     setFormData(prev => ({ ...prev, [fieldName]: file }));
-//     if (errors[fieldName]) {
-//       setErrors(prev => ({ ...prev, [fieldName]: '' }));
-//     }
-//   };
+  // Handle input change
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name as keyof FormErrors]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
+  };
 
-//   const handleCTFCategoryOtherChange = (e: ChangeEvent<HTMLInputElement>) => {
-//     setFormData(prev => ({
-//       ...prev,
-//       ctfCategories: {
-//         ...prev.ctfCategories,
-//         other: e.target.value,
-//       },
-//     }));
-//   };
+  // Handle radio change
+  const handleRadioChange = (value: string) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      participationType: value,
+      selectedCategory: ''
+    }));
+    if (errors.participationType) {
+      setErrors(prev => ({ ...prev, participationType: undefined }));
+    }
+  };
 
-//   const validateForm = (): boolean => {
-//     const newErrors: Record<string, string> = {};
-//     const required = (value: any, fieldName: string, message?: string) => {
-//       if (!value || (typeof value === 'string' && !value.trim())) {
-//         newErrors[fieldName] = message || 'This field is required';
-//       }
-//     };
+  // Handle submit
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      setSubmitStatus({ type: 'error', message: 'Please fix the errors above' });
+      setTimeout(() => setSubmitStatus({ type: null, message: '' }), 5000);
+      return;
+    }
 
-//     required(formData.email, 'email', 'Email is required');
-//     if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
-//       newErrors.email = 'Invalid email address';
-//     }
+    setIsSubmitting(true);
+    setSubmitStatus({ type: null, message: '' });
 
-//     const { participationType } = formData;
+    try {
+      await fetch(GOOGLE_SHEETS_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
 
-//     if (participationType === 'audience') {
-//       required(formData.audienceFullName, 'audienceFullName');
-//       required(formData.audienceEmail, 'audienceEmail');
-//       if (formData.audienceEmail && !/\S+@\S+\.\S+/.test(formData.audienceEmail)) {
-//         newErrors.audienceEmail = 'Invalid email';
-//       }
-//       required(formData.audiencePhone, 'audiencePhone');
-//       required(formData.audienceUniversity, 'audienceUniversity');
-//       required(formData.audienceDays, 'audienceDays');
-//       required(formData.audienceCNIC, 'audienceCNIC');
-//     } else if (participationType === 'ctf') {
-//       required(formData.ctfTeamName, 'ctfTeamName');
-//       required(formData.ctfUniversity, 'ctfUniversity');
-//       required(formData.ctfLeadName, 'ctfLeadName');
-//       required(formData.ctfLeadEmail, 'ctfLeadEmail');
-//       if (formData.ctfLeadEmail && !/\S+@\S+\.\S+/.test(formData.ctfLeadEmail)) {
-//         newErrors.ctfLeadEmail = 'Invalid email';
-//       }
-//       required(formData.ctfLeadPhone, 'ctfLeadPhone');
-//       required(formData.ctfLeadCNIC, 'ctfLeadCNIC');
-//       required(formData.ctfMember2Name, 'ctfMember2Name');
-//       required(formData.ctfMember2CNIC, 'ctfMember2CNIC');
-//       if (formData.ctfMemberCount === '3' || formData.ctfMemberCount === '4') {
-//         required(formData.ctfMember3Name, 'ctfMember3Name');
-//         required(formData.ctfMember3CNIC, 'ctfMember3CNIC');
-//       }
-//       if (formData.ctfMemberCount === '4') {
-//         required(formData.ctfMember4Name, 'ctfMember4Name');
-//         required(formData.ctfMember4CNIC, 'ctfMember4CNIC');
-//       }
-//       if (!formData.ctfRulesAgreed) {
-//         newErrors.ctfRulesAgreed = 'You must agree to the rules';
-//       }
-//     } else if (participationType === 'gaming') {
-//       required(formData.gamingFullName, 'gamingFullName');
-//       required(formData.gamingEmail, 'gamingEmail');
-//       if (formData.gamingEmail && !/\S+@\S+\.\S+/.test(formData.gamingEmail)) {
-//         newErrors.gamingEmail = 'Invalid email';
-//       }
-//       required(formData.gamingPhone, 'gamingPhone');
-//       required(formData.gamingCity, 'gamingCity');
-//       required(formData.gamingUniversity, 'gamingUniversity');
-//       required(formData.gamingGame, 'gamingGame');
-//     } else if (participationType === 'pitching') {
-//       required(formData.pitchFullName, 'pitchFullName');
-//       required(formData.pitchEmail, 'pitchEmail');
-//       if (formData.pitchEmail && !/\S+@\S+\.\S+/.test(formData.pitchEmail)) {
-//         newErrors.pitchEmail = 'Invalid email';
-//       }
-//       required(formData.pitchPhone, 'pitchPhone');
-//       required(formData.pitchCity, 'pitchCity');
-//       required(formData.pitchUniversity, 'pitchUniversity');
-//       required(formData.pitchDegree, 'pitchDegree');
-//       required(formData.pitchApplyAs, 'pitchApplyAs');
-//     }
+      setSubmitStatus({ 
+        type: 'success', 
+        message: '✅ Registration successful! Thank you for registering for NCAT 2026.' 
+      });
+      
+      setFormData({
+        fullName: '',
+        email: '',
+        phone: '',
+        participationType: '',
+        selectedCategory: '',
+        paymentMethod: '',
+        transactionId: '',
+        amountPaid: '',
+        paymentName: '',
+      });
+      
+    } catch (error) {
+      console.error('Error:', error);
+      setSubmitStatus({ 
+        type: 'error', 
+        message: '❌ Registration failed. Please try again.' 
+      });
+    } finally {
+      setIsSubmitting(false);
+      setTimeout(() => setSubmitStatus({ type: null, message: '' }), 5000);
+    }
+  };
 
-//     setErrors(newErrors);
-//     return Object.keys(newErrors).length === 0;
-//   };
+  return (
+    <div className="bg-black min-h-screen">
+      {/* Particle Background */}
+      <section className="relative h-[40vh] w-full overflow-hidden">
+        <Suspense fallback={null}>
+          <ParticleField />
+        </Suspense>
+        <div className="relative z-10 flex h-full flex-col items-center justify-center">
+          <h1
+            className="text-white font-extrabold text-center tracking-tight font-['Plus_Jakarta_Sans']
+                       text-[12vw] md:text-[10vw] lg:text-[8rem] transition-colors duration-300"
+          >
+            Register
+          </h1>
+          <p className="text-[#f0abfc] text-center text-sm md:text-lg lg:text-xl font-light tracking-widest uppercase mt-4">
+            Secure Your Spot at NCAT 2026
+          </p>
+        </div>
+      </section>
 
-//   const handleSubmit = async (e: FormEvent) => {
-//     e.preventDefault();
-//     if (!validateForm()) {
-//       window.scrollTo({ top: 0, behavior: 'smooth' });
-//       return;
-//     }
-//     setIsSubmitting(true);
-//     // Simulate API call
-//     console.log('Form submitted:', formData);
-//     await new Promise(resolve => setTimeout(resolve, 1500));
-//     setIsSubmitting(false);
-//     alert('Registration submitted successfully! (Demo)');
-//   };
+      {/* Registration Form Section */}
+      <div className="relative z-10 bg-black py-20 px-4">
+        <div className="max-w-3xl mx-auto">
+          {/* Form Card */}
+          <div className="bg-black/50 backdrop-blur-sm border border-[#44008b] rounded-2xl p-6 md:p-8 shadow-2xl">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Full Name */}
+              <div className="form-group">
+                <label className="block text-[#f0abfc] text-sm font-semibold mb-2">
+                  Full Name <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  placeholder="Enter your full name"
+                  className={`w-full px-4 py-3 bg-black/50 border ${
+                    errors.fullName ? 'border-red-500' : 'border-[#44008b]'
+                  } rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#f0abfc] transition-colors`}
+                />
+                {errors.fullName && (
+                  <p className="text-red-400 text-xs mt-1">{errors.fullName}</p>
+                )}
+              </div>
 
-//   const renderParticipationSelect = () => (
-//     <div className="mb-8">
-//       <label className="block text-sm font-medium mb-3 text-gray-800">
-//         How would you like to participate at NCAT 2026? <span className="text-red-500">*</span>
-//       </label>
-//       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-//         {[
-//           { value: 'audience', label: 'Attend as Audience / General Attendee' },
-//           { value: 'ctf', label: 'Participate in CTF (Capture The Flag)' },
-//           { value: 'gaming', label: 'Participate in Gaming Competitions' },
-//           { value: 'pitching', label: 'Participate in Idea Pitching' },
-//         ].map(option => (
-//           <label
-//             key={option.value}
-//             className={`flex items-center p-4 border rounded-lg cursor-pointer transition-all ${
-//               formData.participationType === option.value
-//                 ? 'border-[#9f45b0] bg-[#ffe4f2] shadow-md'
-//                 : 'border-gray-200 hover:border-[#e54ed0]'
-//             }`}
-//           >
-//             <input
-//               type="radio"
-//               name="participationType"
-//               value={option.value}
-//               checked={formData.participationType === option.value}
-//               onChange={handleChange}
-//               className="w-4 h-4 text-[#44008b] focus:ring-[#9f45b0]"
-//             />
-//             <span className="ml-3 text-sm">{option.label}</span>
-//           </label>
-//         ))}
-//       </div>
-//     </div>
-//   );
+              {/* Email */}
+              <div className="form-group">
+                <label className="block text-[#f0abfc] text-sm font-semibold mb-2">
+                  Email Address <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="you@example.com"
+                  className={`w-full px-4 py-3 bg-black/50 border ${
+                    errors.email ? 'border-red-500' : 'border-[#44008b]'
+                  } rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#f0abfc] transition-colors`}
+                />
+                {errors.email && (
+                  <p className="text-red-400 text-xs mt-1">{errors.email}</p>
+                )}
+              </div>
 
-//   const renderAudienceForm = () => (
-//     <div className="space-y-6 animate-fadeIn">
-//       <div className="bg-[#ffe4f2] p-4 rounded-lg border-l-4 border-[#e54ed0] text-sm">
-//         ✅ Includes Swags and Snacks, a Digital Certificate of Attendance, access to all keynote sessions, panel talks, and cultural segments, eligibility for Lucky draws, Giveaways, Sponsor activations and networking opportunities.
-//       </div>
-//       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-//         <InputField label="Full Name" name="audienceFullName" value={formData.audienceFullName} onChange={handleChange} required error={errors.audienceFullName} />
-//         <InputField label="Email Address" name="audienceEmail" type="email" value={formData.audienceEmail} onChange={handleChange} required error={errors.audienceEmail} />
-//         <InputField label="Phone Number (WhatsApp preferred)" name="audiencePhone" value={formData.audiencePhone} onChange={handleChange} required error={errors.audiencePhone} />
-//         <InputField label="University / Institute / Organization" name="audienceUniversity" value={formData.audienceUniversity} onChange={handleChange} required error={errors.audienceUniversity} />
-//       </div>
-//       <div>
-//         <label className="block text-sm font-medium mb-2 text-gray-700">
-//           Which day(s) will you attend? <span className="text-red-500">*</span>
-//         </label>
-//         <div className="flex gap-6">
-//           {['Day 1', 'Day 2', 'Both Days'].map(day => (
-//             <label key={day} className="flex items-center">
-//               <input type="radio" name="audienceDays" value={day} checked={formData.audienceDays === day} onChange={handleChange} className="mr-2 text-[#44008b]" />
-//               {day}
-//             </label>
-//           ))}
-//         </div>
-//         {errors.audienceDays && <p className="mt-1 text-sm text-red-600">{errors.audienceDays}</p>}
-//       </div>
-//       <FileUploadField
-//         label="Attach CNIC here"
-//         name="audienceCNIC"
-//         onChange={(e) => handleFileChange(e, 'audienceCNIC')}
-//         required
-//         error={errors.audienceCNIC}
-//         fileName={formData.audienceCNIC?.name}
-//       />
-//     </div>
-//   );
+              {/* Phone */}
+              <div className="form-group">
+                <label className="block text-[#f0abfc] text-sm font-semibold mb-2">
+                  Phone Number (WhatsApp preferred) <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="03XXXXXXXXX"
+                  className={`w-full px-4 py-3 bg-black/50 border ${
+                    errors.phone ? 'border-red-500' : 'border-[#44008b]'
+                  } rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#f0abfc] transition-colors`}
+                />
+                {errors.phone && (
+                  <p className="text-red-400 text-xs mt-1">{errors.phone}</p>
+                )}
+              </div>
 
-//   const renderCTFForm = () => {
-//     const memberCount = parseInt(formData.ctfMemberCount);
-//     return (
-//       <div className="space-y-6 animate-fadeIn">
-//         <div className="bg-[#ffe4f2] p-4 rounded-lg border-l-4 border-[#e54ed0] text-sm">
-//           ✅ Includes Swags and Snacks, a Certificate of Participation, access to all keynote sessions, panel talks, and cultural segments and cyber experience zones, eligibility for Lucky draws, Giveaways, Sponsor activations, hiring visibility and networking opportunities with participants, organizers and communities.
-//         </div>
-//         <div className="space-y-4">
-//           <InputField
-//             label="What is your team's name?"
-//             name="ctfTeamName"
-//             value={formData.ctfTeamName}
-//             onChange={handleChange}
-//             required
-//             error={errors.ctfTeamName}
-//             helperText="Team name must be unique. No offensive, political, or inappropriate names. Used on leaderboard and certificates."
-//           />
-//           <div>
-//             <label className="block text-sm font-medium mb-2">Number of Team Members <span className="text-red-500">*</span></label>
-//             <select name="ctfMemberCount" value={formData.ctfMemberCount} onChange={handleChange} className="w-full md:w-48 p-3 border rounded-lg focus:ring-2 focus:ring-[#9f45b0]">
-//               <option value="2">2</option>
-//               <option value="3">3</option>
-//               <option value="4">4</option>
-//             </select>
-//           </div>
-//           <InputField label="University / Institute / Organization" name="ctfUniversity" value={formData.ctfUniversity} onChange={handleChange} required error={errors.ctfUniversity} />
-//         </div>
+              {/* Participation Type */}
+              <div className="form-group">
+                <label className="block text-[#f0abfc] text-sm font-semibold mb-2">
+                  How would you like to participate? <span className="text-red-400">*</span>
+                </label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {['Audience', 'CTF', 'Gaming', 'Idea Pitching'].map((type) => (
+                    <label
+                      key={type}
+                      className={`flex items-center justify-center gap-2 p-3 rounded-xl cursor-pointer transition-all border ${
+                        formData.participationType === type
+                          ? 'bg-gradient-to-r from-[#44008b] to-[#9f45b0] border-[#f0abfc] shadow-lg'
+                          : 'bg-black/50 border-[#44008b] hover:border-[#f0abfc]'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="participationType"
+                        value={type}
+                        checked={formData.participationType === type}
+                        onChange={() => handleRadioChange(type)}
+                        className="hidden"
+                      />
+                      <span className="text-white text-sm">
+                        {type === 'Audience' && '🎫'}
+                        {type === 'CTF' && '🏆'}
+                        {type === 'Gaming' && '🎮'}
+                        {type === 'Idea Pitching' && '💡'}
+                      </span>
+                      <span className="text-white text-sm">{type}</span>
+                    </label>
+                  ))}
+                </div>
+                {errors.participationType && (
+                  <p className="text-red-400 text-xs mt-1">{errors.participationType}</p>
+                )}
+              </div>
 
-//         {/* Team Lead */}
-//         <div className="border-t pt-6">
-//           <h3 className="font-semibold text-lg mb-4 text-[#00076f]">Team Lead Information</h3>
-//           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-//             <InputField label="Full Name" name="ctfLeadName" value={formData.ctfLeadName} onChange={handleChange} required error={errors.ctfLeadName} />
-//             <InputField label="Email Address" name="ctfLeadEmail" type="email" value={formData.ctfLeadEmail} onChange={handleChange} required error={errors.ctfLeadEmail} />
-//             <InputField label="Phone Number (WhatsApp Required)" name="ctfLeadPhone" value={formData.ctfLeadPhone} onChange={handleChange} required error={errors.ctfLeadPhone} />
-//             <FileUploadField label="Attach picture of CNIC front" name="ctfLeadCNIC" onChange={(e) => handleFileChange(e, 'ctfLeadCNIC')} required error={errors.ctfLeadCNIC} fileName={formData.ctfLeadCNIC?.name} />
-//           </div>
-//         </div>
+              <div className="h-px bg-gradient-to-r from-transparent via-[#44008b] to-transparent my-6"></div>
 
-//         {/* Member 2 */}
-//         <div className="border-t pt-6">
-//           <h3 className="font-semibold text-lg mb-4 text-[#00076f]">Team Member 2</h3>
-//           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-//             <InputField label="Full Name" name="ctfMember2Name" value={formData.ctfMember2Name} onChange={handleChange} required error={errors.ctfMember2Name} />
-//             <FileUploadField label="Attach picture of CNIC front" name="ctfMember2CNIC" onChange={(e) => handleFileChange(e, 'ctfMember2CNIC')} required error={errors.ctfMember2CNIC} fileName={formData.ctfMember2CNIC?.name} />
-//           </div>
-//         </div>
+              {/* Selected Category */}
+              <div className="form-group">
+                <label className="block text-[#f0abfc] text-sm font-semibold mb-2">
+                  Select Category <span className="text-red-400">*</span>
+                </label>
+                <select
+                  name="selectedCategory"
+                  value={formData.selectedCategory}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-3 bg-black/50 border ${
+                    errors.selectedCategory ? 'border-red-500' : 'border-[#44008b]'
+                  } rounded-xl text-white focus:outline-none focus:border-[#f0abfc] transition-colors`}
+                >
+                  <option value="" className="bg-black">Select Category</option>
+                  {getCategoryOptions().map(option => (
+                    <option key={option.value} value={option.value} className="bg-black">
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                {errors.selectedCategory && (
+                  <p className="text-red-400 text-xs mt-1">{errors.selectedCategory}</p>
+                )}
+              </div>
 
-//         {/* Member 3 */}
-//         {memberCount >= 3 && (
-//           <div className="border-t pt-6">
-//             <h3 className="font-semibold text-lg mb-4 text-[#00076f]">Team Member 3</h3>
-//             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-//               <InputField label="Full Name" name="ctfMember3Name" value={formData.ctfMember3Name} onChange={handleChange} required={memberCount >= 3} error={errors.ctfMember3Name} />
-//               <FileUploadField label="Attach picture of CNIC front" name="ctfMember3CNIC" onChange={(e) => handleFileChange(e, 'ctfMember3CNIC')} required={memberCount >= 3} error={errors.ctfMember3CNIC} fileName={formData.ctfMember3CNIC?.name} />
-//             </div>
-//           </div>
-//         )}
+              {/* Payment Method */}
+              <div className="form-group">
+                <label className="block text-[#f0abfc] text-sm font-semibold mb-2">
+                  Payment Method <span className="text-red-400">*</span>
+                </label>
+                <select
+                  name="paymentMethod"
+                  value={formData.paymentMethod}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-3 bg-black/50 border ${
+                    errors.paymentMethod ? 'border-red-500' : 'border-[#44008b]'
+                  } rounded-xl text-white focus:outline-none focus:border-[#f0abfc] transition-colors`}
+                >
+                  <option value="" className="bg-black">Select Payment Method</option>
+                  <option value="Bank Transfer" className="bg-black">🏦 Bank Transfer</option>
+                  <option value="Jazzcash" className="bg-black">📱 Jazzcash</option>
+                  <option value="Easypaisa" className="bg-black">📱 Easypaisa</option>
+                </select>
+                {errors.paymentMethod && (
+                  <p className="text-red-400 text-xs mt-1">{errors.paymentMethod}</p>
+                )}
+              </div>
 
-//         {/* Member 4 */}
-//         {memberCount === 4 && (
-//           <div className="border-t pt-6">
-//             <h3 className="font-semibold text-lg mb-4 text-[#00076f]">Team Member 4</h3>
-//             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-//               <InputField label="Full Name" name="ctfMember4Name" value={formData.ctfMember4Name} onChange={handleChange} required error={errors.ctfMember4Name} />
-//               <FileUploadField label="Attach picture of CNIC front" name="ctfMember4CNIC" onChange={(e) => handleFileChange(e, 'ctfMember4CNIC')} required error={errors.ctfMember4CNIC} fileName={formData.ctfMember4CNIC?.name} />
-//             </div>
-//           </div>
-//         )}
+              {/* Transaction ID */}
+              <div className="form-group">
+                <label className="block text-[#f0abfc] text-sm font-semibold mb-2">
+                  Transaction ID / Reference Number <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="transactionId"
+                  value={formData.transactionId}
+                  onChange={handleChange}
+                  placeholder="Enter transaction ID"
+                  className={`w-full px-4 py-3 bg-black/50 border ${
+                    errors.transactionId ? 'border-red-500' : 'border-[#44008b]'
+                  } rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#f0abfc] transition-colors`}
+                />
+                {errors.transactionId && (
+                  <p className="text-red-400 text-xs mt-1">{errors.transactionId}</p>
+                )}
+              </div>
 
-//         <div className="border-t pt-6">
-//           <label className="block text-sm font-medium mb-2">Team Skill Level (Self‑Assessed) <span className="text-red-500">*</span></label>
-//           <div className="flex gap-6">
-//             {['Beginner', 'Intermediate', 'Advanced'].map(level => (
-//               <label key={level} className="flex items-center">
-//                 <input type="radio" name="ctfSkillLevel" value={level} checked={formData.ctfSkillLevel === level} onChange={handleChange} className="mr-2" /> {level}
-//               </label>
-//             ))}
-//           </div>
-//         </div>
+              {/* Amount Paid */}
+              <div className="form-group">
+                <label className="block text-[#f0abfc] text-sm font-semibold mb-2">
+                  Amount Paid (PKR) <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="number"
+                  name="amountPaid"
+                  value={formData.amountPaid}
+                  onChange={handleChange}
+                  placeholder="e.g., 2000"
+                  className={`w-full px-4 py-3 bg-black/50 border ${
+                    errors.amountPaid ? 'border-red-500' : 'border-[#44008b]'
+                  } rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#f0abfc] transition-colors`}
+                />
+                {errors.amountPaid && (
+                  <p className="text-red-400 text-xs mt-1">{errors.amountPaid}</p>
+                )}
+              </div>
 
-//         <div>
-//           <label className="block text-sm font-medium mb-2">CTF Categories of Interest <span className="text-red-500">*</span></label>
-//           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-//             {Object.entries({
-//               web: 'Web Exploitation',
-//               crypto: 'Cryptography',
-//               forensics: 'Digital Forensics',
-//               osint: 'OSINT',
-//               rev: 'Reverse Engineering',
-//               binary: 'Binary Exploitation',
-//               networking: 'Networking',
-//               general: 'General Cybersecurity',
-//             }).map(([key, label]) => (
-//               <label key={key} className="flex items-center">
-//                 <input
-//                   type="checkbox"
-//                   name={`ctfCategory_${key}`}
-//                   checked={formData.ctfCategories[key as keyof CTFCategories] as boolean}
-//                   onChange={handleChange}
-//                   className="mr-2 text-[#44008b]"
-//                 />
-//                 {label}
-//               </label>
-//             ))}
-//           </div>
-//           <div className="mt-2">
-//             <input
-//               type="text"
-//               placeholder="Other (please specify)"
-//               value={formData.ctfCategories.other}
-//               onChange={handleCTFCategoryOtherChange}
-//               className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#9f45b0]"
-//             />
-//           </div>
-//         </div>
+              {/* Payment Name */}
+              <div className="form-group">
+                <label className="block text-[#f0abfc] text-sm font-semibold mb-2">
+                  Name used for payment <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="paymentName"
+                  value={formData.paymentName}
+                  onChange={handleChange}
+                  placeholder="Name on bank account / Jazzcash"
+                  className={`w-full px-4 py-3 bg-black/50 border ${
+                    errors.paymentName ? 'border-red-500' : 'border-[#44008b]'
+                  } rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#f0abfc] transition-colors`}
+                />
+                {errors.paymentName && (
+                  <p className="text-red-400 text-xs mt-1">{errors.paymentName}</p>
+                )}
+              </div>
 
-//         <InputField label="Any special requirements or accessibility needs?" name="ctfSpecialReqs" value={formData.ctfSpecialReqs} onChange={handleChange} />
+              {/* Bank Details Info */}
+              <div className="bg-gradient-to-r from-[#00076f]/20 to-[#44008b]/20 border border-[#44008b] rounded-xl p-4">
+                <h4 className="text-[#f0abfc] font-semibold mb-2">🏦 Bank Account Details</h4>
+                <p className="text-gray-300 text-sm">
+                  <span className="text-white">Account Name:</span> YUNI (SMC-PRIVATE) LIMITED
+                </p>
+                <p className="text-gray-300 text-sm">
+                  <span className="text-white">Account No:</span> 0140-1010831162
+                </p>
+              </div>
 
-//         <div className="border-t pt-6">
-//           <label className="flex items-start mb-2">
-//             <input
-//               type="checkbox"
-//               name="ctfRulesAgreed"
-//               checked={formData.ctfRulesAgreed}
-//               onChange={handleChange}
-//               className="mt-1 mr-3 text-[#44008b]"
-//             />
-//             <span className="text-sm">
-//               <strong>CTF Rules Acknowledgement <span className="text-red-500">*</span></strong><br />
-//               We agree not to attack NCAT infrastructure, networks, or other teams<br />
-//               We will not share flags, solutions, or hints with others<br />
-//               We understand that plagiarism or misconduct will lead to disqualification<br />
-//               We accept that the organizers’ decision is final
-//             </span>
-//           </label>
-//           {errors.ctfRulesAgreed && <p className="text-sm text-red-600">{errors.ctfRulesAgreed}</p>}
-//         </div>
-//       </div>
-//     );
-//   };
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-3 px-4 bg-gradient-to-r from-[#44008b] to-[#9f45b0] hover:from-[#00076f] hover:to-[#44008b] text-white font-bold rounded-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Submitting...
+                  </>
+                ) : (
+                  'Register Now'
+                )}
+              </button>
 
-//   const renderGamingForm = () => (
-//     <div className="space-y-6 animate-fadeIn">
-//       <div className="bg-[#ffe4f2] p-4 rounded-lg border-l-4 border-[#e54ed0] text-sm">
-//         ✅ Includes Swags and Snacks, a Certificate of Participation, access to all keynote sessions, panel talks, and cultural segments and cyber experience zones, eligibility for Lucky draws, Giveaways, Sponsor activations, exposure to industry professionals and networking opportunities with participants, organizers and communities.
-//       </div>
-//       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-//         <InputField label="Full Name" name="gamingFullName" value={formData.gamingFullName} onChange={handleChange} required error={errors.gamingFullName} />
-//         <InputField label="Email Address" name="gamingEmail" type="email" value={formData.gamingEmail} onChange={handleChange} required error={errors.gamingEmail} />
-//         <InputField label="Phone Number (WhatsApp preferred)" name="gamingPhone" value={formData.gamingPhone} onChange={handleChange} required error={errors.gamingPhone} />
-//         <InputField label="City" name="gamingCity" value={formData.gamingCity} onChange={handleChange} required error={errors.gamingCity} />
-//         <InputField label="University / Institute / Organization" name="gamingUniversity" value={formData.gamingUniversity} onChange={handleChange} required error={errors.gamingUniversity} />
-//       </div>
-//       <div>
-//         <label className="block text-sm font-medium mb-2">Which game are you registering for? <span className="text-red-500">*</span></label>
-//         <select name="gamingGame" value={formData.gamingGame} onChange={handleChange} className="w-full md:w-64 p-3 border rounded-lg focus:ring-2 focus:ring-[#9f45b0]">
-//           <option value="">Select a game</option>
-//           <option value="PUBG">PUBG</option>
-//           <option value="TEKKEN 8">TEKKEN 8</option>
-//           <option value="FIFA 25">FIFA 25</option>
-//         </select>
-//         {errors.gamingGame && <p className="mt-1 text-sm text-red-600">{errors.gamingGame}</p>}
-//       </div>
-//     </div>
-//   );
+              {/* Status Message */}
+              {submitStatus.type && (
+                <div
+                  className={`p-4 rounded-xl text-center ${
+                    submitStatus.type === 'success'
+                      ? 'bg-green-500/20 border border-green-500 text-green-300'
+                      : 'bg-red-500/20 border border-red-500 text-red-300'
+                  }`}
+                >
+                  {submitStatus.message}
+                </div>
+              )}
+            </form>
+          </div>
+        </div>
+      </div>
 
-//   const renderPitchingForm = () => (
-//     <div className="space-y-6 animate-fadeIn">
-//       <div className="bg-[#ffe4f2] p-4 rounded-lg border-l-4 border-[#e54ed0] text-sm">
-//         ✅ Includes Swags and Snacks, a Certificate of Participation, shortlisting and Finalist Recognition, Opportunity to pitch before an expert jury, visibility to industry professionals, mentors & sponsors, feedback & evaluation from experienced judges, access to all keynote sessions, panel talks, and cultural segments and cyber experience zones, eligibility for Lucky draws, Giveaways, Sponsor activations, and networking opportunities with participants, organizers and communities.
-//       </div>
-//       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-//         <InputField label="Full Name (Team Lead / Individual)" name="pitchFullName" value={formData.pitchFullName} onChange={handleChange} required error={errors.pitchFullName} />
-//         <InputField label="Email Address" name="pitchEmail" type="email" value={formData.pitchEmail} onChange={handleChange} required error={errors.pitchEmail} />
-//         <InputField label="Phone Number (WhatsApp preferred)" name="pitchPhone" value={formData.pitchPhone} onChange={handleChange} required error={errors.pitchPhone} />
-//         <InputField label="City" name="pitchCity" value={formData.pitchCity} onChange={handleChange} required error={errors.pitchCity} />
-//         <InputField label="University / Institute / Organization" name="pitchUniversity" value={formData.pitchUniversity} onChange={handleChange} required error={errors.pitchUniversity} />
-//         <InputField label="Degree / Program / Field of Study" name="pitchDegree" value={formData.pitchDegree} onChange={handleChange} required error={errors.pitchDegree} />
-//       </div>
-//       <div>
-//         <label className="block text-sm font-medium mb-2">Are you applying as: <span className="text-red-500">*</span></label>
-//         <div className="flex gap-6">
-//           {['Individual', 'Team'].map(opt => (
-//             <label key={opt} className="flex items-center">
-//               <input type="radio" name="pitchApplyAs" value={opt} checked={formData.pitchApplyAs === opt} onChange={handleChange} className="mr-2" /> {opt}
-//             </label>
-//           ))}
-//         </div>
-//         {errors.pitchApplyAs && <p className="mt-1 text-sm text-red-600">{errors.pitchApplyAs}</p>}
-//       </div>
-//     </div>
-//   );
+      <Footer />
+    </div>
+  );
+};
 
-//   return (
-//     <div className="min-h-screen bg-black">
-//       {/* Full-width white card */}
-//       <div className="w-full bg-white shadow-2xl">
-//         {/* Header - full width, dark */}
-//         <div className="w-full bg-gradient-to-r from-[#00076f] to-[#44008b] px-6 sm:px-12 py-8 text-white">
-//           <h1 className="text-3xl sm:text-4xl font-bold">NCAT 2026 — Official Registration & Participation Form</h1>
-//           <p className="mt-2 text-[#ffe4f2] text-lg">National Conference of Applied Technology</p>
-//           <p className="text-[#e54ed0] font-medium">Chapter: Cybersecurity & Interactive Systems</p>
-//           <p className="mt-2 flex items-center text-sm opacity-90">📍 Hosted at NASTP, Rawalpindi</p>
-//         </div>
-
-//         {/* Form content with generous padding */}
-//         <div className="px-6 sm:px-12 py-8">
-//           <div className="prose prose-sm max-w-none mb-6 text-gray-600">
-//             <p>Welcome to NCAT 2026, a national‑level event bringing together students, professionals, and industry leaders for cybersecurity awareness, competitions, gaming, innovation, and learning.</p>
-//             <p>This form will guide you to the correct registration section based on how you wish to participate.</p>
-//             <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-4">
-//               <p className="font-medium text-yellow-800">⚠️ Important Notes:</p>
-//               <ul className="list-disc ml-5 text-sm text-yellow-700">
-//                 <li>Each category has different requirements</li>
-//                 <li>Incomplete or incorrect submissions may be rejected</li>
-//                 <li>Student discounts require valid student ID verification</li>
-//               </ul>
-//             </div>
-//             <p className="text-sm">Please read each question carefully and select only what applies to you.</p>
-//           </div>
-
-//           <div className="border-b pb-4 mb-6 flex items-center justify-between text-sm text-gray-500">
-//             <span>232118@students.au.edu.pk</span>
-//             <span className="text-[#9f45b0] cursor-pointer hover:underline">Switch account</span>
-//           </div>
-
-//           <div className="text-xs text-gray-400 mb-6">
-//             <p>The name, email, and photo associated with your Google account will be recorded when you upload files and submit this form</p>
-//             <p>Any files that are uploaded will be shared outside of the organization they belong to.</p>
-//             <p className="mt-2"><span className="text-red-500">*</span> Indicates required question</p>
-//           </div>
-
-//           <form onSubmit={handleSubmit}>
-//             <InputField
-//               label="Email"
-//               name="email"
-//               type="email"
-//               value={formData.email}
-//               onChange={handleChange}
-//               required
-//               error={errors.email}
-//               placeholder="your.email@example.com"
-//             />
-
-//             {renderParticipationSelect()}
-
-//             <div className="mt-8 pt-6 border-t">
-//               {formData.participationType === 'audience' && renderAudienceForm()}
-//               {formData.participationType === 'ctf' && renderCTFForm()}
-//               {formData.participationType === 'gaming' && renderGamingForm()}
-//               {formData.participationType === 'pitching' && renderPitchingForm()}
-//             </div>
-
-//             <div className="mt-10 flex justify-end">
-//               <button
-//                 type="submit"
-//                 disabled={isSubmitting}
-//                 className="px-8 py-3 bg-gradient-to-r from-[#44008b] to-[#9f45b0] text-white font-semibold rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-//               >
-//                 {isSubmitting ? 'Submitting...' : 'Submit Registration'}
-//               </button>
-//             </div>
-//           </form>
-//         </div>
-//       </div>
-
-//       <style>{`
-//         @keyframes fadeIn {
-//           from { opacity: 0; transform: translateY(10px); }
-//           to { opacity: 1; transform: translateY(0); }
-//         }
-//         .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
-//       `}</style>
-//     </div>
-//   );
-// };
-
-// // Reusable input component
-// const InputField: React.FC<{
-//   label: string;
-//   name: string;
-//   value: string;
-//   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
-//   type?: string;
-//   required?: boolean;
-//   error?: string;
-//   placeholder?: string;
-//   helperText?: string;
-// }> = ({ label, name, value, onChange, type = 'text', required, error, placeholder, helperText }) => (
-//   <div>
-//     <label className="block text-sm font-medium mb-2 text-gray-700">
-//       {label} {required && <span className="text-red-500">*</span>}
-//     </label>
-//     <input
-//       type={type}
-//       name={name}
-//       value={value}
-//       onChange={onChange}
-//       placeholder={placeholder}
-//       className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#9f45b0] ${
-//         error ? 'border-red-500' : 'border-gray-300'
-//       }`}
-//     />
-//     {helperText && <p className="mt-1 text-xs text-gray-500">{helperText}</p>}
-//     {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
-//   </div>
-// );
-
-// // File upload component
-// const FileUploadField: React.FC<{
-//   label: string;
-//   name: string;
-//   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
-//   required?: boolean;
-//   error?: string;
-//   fileName?: string;
-// }> = ({ label, name, onChange, required, error, fileName }) => (
-//   <div>
-//     <label className="block text-sm font-medium mb-2 text-gray-700">
-//       {label} {required && <span className="text-red-500">*</span>}
-//     </label>
-//     <div className="flex items-center">
-//       <label className="cursor-pointer bg-[#ffe4f2] hover:bg-[#e54ed0] hover:text-white text-[#44008b] font-medium py-2 px-4 rounded-lg border border-[#9f45b0] transition-colors">
-//         Choose File
-//         <input type="file" name={name} onChange={onChange} accept=".pdf,image/*" className="hidden" />
-//       </label>
-//       <span className="ml-3 text-sm text-gray-600">{fileName || 'No file chosen'}</span>
-//     </div>
-//     <p className="mt-1 text-xs text-gray-500">Upload 1 supported file: PDF or image. Max 10 MB.</p>
-//     {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
-//   </div>
-// );
-
-// export default RegistrationPage;
+export default RegisterPage;
